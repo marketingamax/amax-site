@@ -85,7 +85,6 @@
   @keyframes pulse { 0%{transform:scaleY(0)} 50%{transform:scaleY(1)} 100%{transform:scaleY(1);opacity:0} }
   .tagline { position:absolute; left:clamp(20px,4vw,56px); bottom:34px; z-index:5; font-size:clamp(13px,1.2vw,16px); line-height:1.4; max-width:320px; opacity:.9; will-change:opacity,transform; text-shadow:0 1px 12px rgba(0,0,0,.4); }
 
-  @media (prefers-reduced-motion:reduce){ .fog,.skyfog,.rush{animation:none} }
 
   /* ================= SITE (pós-hero) ================= */
   :root { --pad:clamp(16px,1.6vw,28px); }
@@ -912,7 +911,7 @@ document.querySelectorAll('.typed').forEach(function(el){
     };
     tick();
   }
-  new IntersectionObserver((es, o) => { if (!started && es.some(e => e.isIntersecting)) { started = true; o.disconnect(); if (reduced) chars.forEach(c => c.classList.add('on')); else type(); } }, { threshold: .6 }).observe(el);
+  new IntersectionObserver((es, o) => { if (!started && es.some(e => e.isIntersecting)) { started = true; o.disconnect(); type(); } }, { threshold: .6 }).observe(el);
 });
 
 /* ---------- galerias em faixas (abre no mouse / toque) ---------- */
@@ -1056,8 +1055,7 @@ document.querySelectorAll('.acc').forEach(acc => {
   function go(i){ cur = (i + N) % N; layout(); }
   cards.forEach((c, i) => c.addEventListener('click', () => { if (i !== cur) { go(i); restart(); } }));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function restart(){ clearInterval(timer); if (!reduced) timer = setInterval(() => go(cur + 1), 3200); }
-  root.addEventListener('mouseenter', () => clearInterval(timer)); root.addEventListener('mouseleave', restart);
+  function restart(){ clearInterval(timer); timer = setInterval(() => go(cur + 1), 3000); }
   addEventListener('resize', layout);
   layout(); restart();
 })();
