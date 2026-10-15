@@ -224,9 +224,8 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .feature.fullw .txt { position:static; }
   .feature.fullw .txt dl { max-width:420px; }
   .cena-logos { display:flex; align-items:center; justify-content:center; gap:clamp(28px,6vw,110px); flex-wrap:wrap; background:#000; border-radius:8px; padding:clamp(34px,5vw,80px) clamp(20px,4vw,70px); }
-  .cena-hist { position:relative; margin:0 calc(var(--pad) * -1); border-radius:0; overflow:hidden; background:#000; height:100vh; height:100svh; min-height:480px; display:flex; justify-content:center; align-items:stretch; }
-  .cena-hist .bg { position:absolute; inset:-8%; width:116%; height:116%; object-fit:cover; filter:grayscale(1) blur(40px) brightness(.5) contrast(1.1); }
-  .cena-hist .fg { position:relative; height:100%; width:auto; max-width:100%; aspect-ratio:1700/2278; object-fit:contain; display:block; margin:0 auto; filter:grayscale(1) contrast(1.06); }
+  .cena-hist { margin:0; border-radius:8px; overflow:hidden; background:#000; }
+  .cena-hist img { width:100%; height:clamp(300px,40vw,620px); object-fit:cover; object-position:50% 60%; display:block; filter:grayscale(1) contrast(1.06); }
   .cena-logos img { height:clamp(42px,5.2vw,86px); width:auto; }
   /* antes e depois da marca (versão compacta) */
   .ba { display:flex; align-items:center; justify-content:space-between; gap:clamp(16px,3vw,48px); flex-wrap:wrap; background:#000; color:#fff; border-radius:8px; padding:clamp(16px,1.8vw,26px) clamp(20px,3vw,44px); }
@@ -502,7 +501,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
         <img src="img/cena-empreendimentos.png" alt="Cena Empreendimentos">
         <img src="img/cena-urbanismo.png" alt="Cena Urbanismo">
       </div>
-      <figure class="cena-hist rv"><img class="bg" src="img/cena-ponte-full.jpg" alt="" aria-hidden="true" loading="lazy"><img class="fg" src="img/cena-ponte-full.jpg" alt="Ponte Hercílio Luz ao pôr do sol, em Florianópolis" loading="lazy"></figure>
+      <figure class="cena-hist rv"><img src="img/cena-ponte-full.jpg" alt="Ponte Hercílio Luz ao pôr do sol, em Florianópolis" loading="lazy"></figure>
     </article>
 
     <article class="feature fullw">
