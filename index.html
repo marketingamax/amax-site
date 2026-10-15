@@ -166,20 +166,22 @@
   .acc figcaption b { display:block; font-weight:500; font-size:clamp(16px,1.4vw,22px); letter-spacing:-.03em; margin-bottom:4px; }
   .acc figcaption span { display:block; font-size:clamp(12px,.95vw,15px); opacity:.85; max-width:42ch; }
   @media (max-width:820px){ .acc { height:420px; } .acc figure.on { flex:5 1 0; } }
-  .feature.fullw { grid-template-columns:1fr; gap:clamp(30px,4vw,60px); }
-  .feature.fullw .txt { position:static; display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,90px); align-items:start; }
-  .feature.fullw .txt dl { margin-top:0; }
-  /* antes e depois da marca */
-  .ba { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:clamp(20px,4vw,70px); align-items:center; background:#000; color:#fff; border-radius:8px; padding:clamp(28px,4vw,64px) clamp(24px,5vw,90px); }
-  .ba-t { font-size:clamp(26px,3.2vw,56px); line-height:1.02; letter-spacing:-.05em; }
-  .ba-item { display:flex; flex-direction:column; align-items:center; gap:clamp(14px,1.6vw,26px); }
-  .ba-item span { font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.55; }
-  .ba-item img { height:clamp(46px,5.4vw,96px); width:auto; max-width:100%; object-fit:contain; }
-  @media (max-width:820px){ .ba { grid-template-columns:1fr 1fr; } .ba-t { grid-column:1 / -1; } }
+  .feature.fullw { grid-template-columns:1fr; gap:clamp(18px,2vw,30px); }
+  .feature.fullw .txt { position:static; }
+  /* antes e depois da marca (versão compacta) */
+  .ba { display:flex; align-items:center; justify-content:space-between; gap:clamp(16px,3vw,48px); flex-wrap:wrap; background:#000; color:#fff; border-radius:8px; padding:clamp(16px,1.8vw,26px) clamp(20px,3vw,44px); }
+  .ba-t { font-size:clamp(17px,1.7vw,27px); letter-spacing:-.04em; }
+  .ba-item { display:flex; align-items:center; gap:clamp(10px,1.4vw,20px); }
+  .ba-item span { font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.55; }
+  .ba-item img { height:clamp(24px,2.3vw,38px); width:auto; }
+  .ba-arrow { font-style:normal; opacity:.5; font-size:18px; }
+  .ba-meta { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .ba-meta .soon { margin-top:0; }
+  @media (max-width:820px){ .ba { justify-content:flex-start; } }
   .acc.many { height:clamp(420px,42vw,740px); }
   .acc.many figure.on { flex:9 1 0; }
   .acc.many .lab { font-size:12px; }
-  @media (max-width:820px){ .feature.fullw .txt { grid-template-columns:1fr; } .acc.many { height:460px; } }
+  @media (max-width:820px){ .acc.many { height:460px; } }
   .gal { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
   .gal figure { overflow:hidden; border-radius:2px; background:#ddd; }
   .gal .a { grid-column:span 6; aspect-ratio:16/9; }
@@ -403,27 +405,23 @@
   <section class="sec light" id="cases" style="padding-top:clamp(80px,10vw,170px)">
     <div class="cases-head">
       <h2 class="big rv">Cases</h2>
-      <p class="mid-t rv">Trabalho que começou com a tabela e terminou em <em class="serif">VGV.</em></p>
     </div>
 
     <article class="feature fullw">
       <div class="txt rv">
-        <div class="l">
-          <div class="lbl">Case 01 · Verso</div>
-          <h3>De Semaco a Verso.</h3>
-          <p class="small" style="max-width:44ch">Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.</p>
-        </div>
-        <div class="r">
-          <dl class="small">
-            <dt>O que fizemos</dt><dd>Naming · identidade visual · brandbook · campanha de lançamento · materiais e aplicações</dd>
-          </dl>
-          <div class="soon small"><i class="dot"></i>Em breve: um novo conceito único, nunca visto em Floripa.</div>
-        </div>
+        <div class="lbl">Case 01 · Verso</div>
+        <h3>De Semaco a Verso.</h3>
+        <p class="small" style="max-width:62ch">Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.</p>
       </div>
       <div class="ba rv">
-        <p class="ba-t">Rebranding<br>+ Naming</p>
+        <p class="ba-t">Rebranding + Naming</p>
         <div class="ba-item"><span>Antes</span><img src="img/semaco-logo.png" alt="Semaco"></div>
+        <i class="ba-arrow">→</i>
         <div class="ba-item"><span>Depois</span><img src="img/verso-logo-w.png" alt="Verso Empreendimentos"></div>
+      </div>
+      <div class="ba-meta rv">
+        <span class="small">Naming · identidade visual · brandbook · campanha de lançamento · materiais e aplicações</span>
+        <div class="soon small"><i class="dot"></i>Em breve: um novo conceito único, nunca visto em Floripa.</div>
       </div>
       <div class="acc many rv">
         <figure class="on"><img src="img/v-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O Rio Tavares ganha um novo Verso.</span></figcaption></figure>
