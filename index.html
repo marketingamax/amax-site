@@ -125,7 +125,8 @@
   /* tese */
   .tese .stmt { text-indent:0; text-align:center; max-width:17em; margin:0 auto; }
   .tese .cols { display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,90px); max-width:980px; margin:clamp(60px,9vw,150px) auto 0; text-align:center; }
-  .tese .cols p { max-width:36ch; margin:0 auto; }
+  .tese-text { max-width:52ch; margin:clamp(50px,7vw,120px) auto 0; text-align:center; font-size:clamp(16px,1.35vw,23px); line-height:1.22; }
+  .tese-text p + p { margin-top:1em; }
 
   /* rastro de imagens no mouse */
   .trail-area { position:relative; height:clamp(380px,78vh,820px); margin:clamp(40px,6vw,100px) calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); overflow:hidden; cursor:none; touch-action:pan-y; }
@@ -373,7 +374,7 @@
 
   <section class="sec dark tese">
     <h2 class="big stmt rv">Extensão estratégica da incorporadora. Com um objetivo: <em class="serif">VGV.</em></h2>
-    <div class="cols">
+    <div class="tese-text">
       <p class="rv">Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, plantas, renders, terreno e concorrência, e decidimos junto com você. A marca vem depois, como consequência da estratégia.</p>
       <p class="rv">Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?</p>
     </div>
