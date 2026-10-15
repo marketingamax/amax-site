@@ -277,8 +277,8 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .bldg:active { cursor:grabbing; }
   .bldg canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
   .bldg-hint { position:absolute; left:0; bottom:6px; font-size:12px; letter-spacing:.06em; opacity:.55; pointer-events:none; }
-  .org { display:grid; grid-template-columns:1fr minmax(300px,34vw) 1fr; gap:var(--pad); align-items:center; }
-  .org .big { font-size:clamp(28px,3.6vw,68px); }
+  .org { display:grid; grid-template-columns:1fr minmax(300px,34vw) 1fr; gap:var(--pad); align-items:center; padding:0 clamp(24px,5.5vw,110px); }
+  .org .big { font-size:clamp(24px,3.1vw,60px); white-space:nowrap; }
   .org-l { text-align:left; } .org-r { text-align:right; }
   .origem .org figure { max-width:none; width:100%; }
   .org-p { text-align:center; max-width:46ch; margin:clamp(30px,4vw,70px) auto 0; font-size:clamp(16px,1.35vw,23px); line-height:1.2; }
@@ -572,7 +572,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
     <div class="org">
       <h2 class="big org-l rv">8 anos dentro de<br>uma incorporadora.</h2>
       <figure class="rv bldg" id="bldg" aria-label="Modelo 3D de um edifício em construção. Arraste para girar."><canvas></canvas><span class="bldg-hint">Arraste para girar ↔</span></figure>
-      <h2 class="big org-r rv">Agora,<br>do seu lado.</h2>
+      <h2 class="big org-r rv">Do zero<br>ao lançado.</h2>
     </div>
     <p class="org-p rv">Conhecemos o risco, o cronograma e a pressão de lançar por dentro. Por isso a AMAX trabalha como parte do seu time, não como fornecedor.</p>
 
