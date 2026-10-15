@@ -49,29 +49,20 @@ Na Cena, construímos a comunicação de três marcas: locações, empreendiment
 
 [Faixa de imagens com os 6 projetos]
 
-## 8. O que fazemos
-**Quatro produtos. Um mesmo objetivo.** (nomes provisórios)
+## 8. Nossos produtos (conteúdo do PDF "AMAX .pdf")
+**Quatro produtos. Um mesmo objetivo.**
 
-**Lançamento**
-Do conceito ao stand. Diagnóstico, naming, posicionamento, identidade e brandbook do empreendimento.
-*Para quem:* incorporadoras que vão lançar e precisam de um produto com marca forte.
-Entregas: imersão estratégica · posicionamento e naming · identidade visual · brandbook · direção criativa · estrutura do site e landing pages.
+**01 – Branding e Posicionamento** (dois escopos)
+- Lançamentos: imersão estratégica · estratégia de posicionamento · construção da marca · identidade visual · brandbook do empreendimento · direcionamento comercial · direção criativa · experiência digital · entrega final
+- Construtoras: diagnóstico estratégico · identidade visual · essência da marca · posicionamento estratégico · plataforma de marca · arquitetura de marca · experiência digital · manual de marca e implementação
 
-**Marca de Incorporadora**
-A marca da empresa, não só a do empreendimento.
-*Para quem:* construtoras e incorporadoras que querem ser percebidas como grandes antes de serem grandes.
-Entregas: diagnóstico · essência e plataforma de marca · arquitetura de marcas · identidade · manual · site institucional.
+**02 – Estratégia** (lançamento e comercialização): plano de investimento de marketing · reuniões e acompanhamento · planejamento estratégico · materiais de apoio à estratégia
 
-**Plano Comercial**
-Um plano de marketing e vendas ligado à projeção de VGV.
-*Para quem:* quem já tem o produto e precisa de estratégia para vendê-lo.
-Entregas: jornada do cliente · canais e verba por canal · cronograma · captação e nutrição de leads · indicadores e dashboard.
+**03 – Execução de Marketing e Vendas**: escopo estratégico · plano estratégico
 
-**Operação de Lançamento**
-Executamos o que desenhamos: eventos, showroom, mídia, materiais, ativações e relacionamento com corretores.
-O corretor que entende o produto vende mais rápido. Por isso conectamos incorporadora, *house* e imobiliária.
+**04 – Elo entre incorporadora, house e imobiliária**: serviços para imobiliárias e house; lançamentos em andamento analisados caso a caso
 
-*(Cada produto tem "Ver escopo completo" com as listas detalhadas recolhidas.)*
+(Cada produto tem "Ver escopo" com as listas completas, no site.)
 
 ## 9. Como trabalhamos
 **Quatro etapas. Um time só.**
