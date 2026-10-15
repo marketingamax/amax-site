@@ -4,6 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AMAX</title>
+<script>
+/* sempre começa do topo (introdução), mesmo ao atualizar a página */
+try { history.scrollRestoration = 'manual'; } catch (e) {}
+(function(){
+  var hadHash = !!location.hash;
+  if (hadHash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  function top(){ scrollTo(0, 0); }
+  top(); addEventListener('load', function(){ top(); setTimeout(top, 60); setTimeout(top, 250); });
+  addEventListener('pageshow', function(e){ if (e.persisted) top(); });
+})();
+</script>
+
 <style>
   :root { --bg:#000; --fg:#fff; }
   * { box-sizing:border-box; margin:0; padding:0; }
