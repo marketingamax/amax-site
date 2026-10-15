@@ -81,7 +81,7 @@ Na Cena, construímos a comunicação de três marcas: locações, empreendiment
 **Maxmiller Moura, sócio fundador.** Empresário do setor imobiliário e de tecnologia. Atua na captação, posicionamento e aceleração de vendas.
 
 ## 12. Chamada final
-**Tem um lançamento no horizonte? *Vamos conversar.***
+**Vamos construir o próximo capítulo da sua incorporadora?**
 Em 30 minutos mostramos como seríamos a extensão do seu time nesse lançamento.
 [Falar no WhatsApp] · comercial@amax-lancamentos.com · +55 (48) 98800-8769
 

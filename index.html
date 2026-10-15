@@ -224,9 +224,9 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .feature.fullw .txt { position:static; }
   .feature.fullw .txt dl { max-width:420px; }
   .cena-logos { display:flex; align-items:center; justify-content:center; gap:clamp(28px,6vw,110px); flex-wrap:wrap; background:#000; border-radius:8px; padding:clamp(34px,5vw,80px) clamp(20px,4vw,70px); }
-  .cena-hist { margin:0; border-radius:8px; overflow:hidden; background:#000; }
-  .cena-hist img { width:100%; height:clamp(240px,34vw,520px); object-fit:cover; object-position:50% 55%; display:block; }
-  .cena-hist figcaption { padding:12px 16px; background:#000; color:#fff; opacity:.8; }
+  .cena-hist { position:relative; margin:0; border-radius:8px; overflow:hidden; background:#000; height:clamp(380px,46vw,660px); display:flex; justify-content:center; align-items:stretch; }
+  .cena-hist .bg { position:absolute; inset:-8%; width:116%; height:116%; object-fit:cover; filter:blur(38px) brightness(.55) saturate(1.2); }
+  .cena-hist .fg { position:relative; height:100%; width:auto; max-width:100%; aspect-ratio:1700/2278; object-fit:contain; display:block; margin:0 auto; }
   .cena-logos img { height:clamp(42px,5.2vw,86px); width:auto; }
   /* antes e depois da marca (versão compacta) */
   .ba { display:flex; align-items:center; justify-content:space-between; gap:clamp(16px,3vw,48px); flex-wrap:wrap; background:#000; color:#fff; border-radius:8px; padding:clamp(16px,1.8vw,26px) clamp(20px,3vw,44px); }
@@ -502,7 +502,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
         <img src="img/cena-empreendimentos.png" alt="Cena Empreendimentos">
         <img src="img/cena-urbanismo.png" alt="Cena Urbanismo">
       </div>
-      <figure class="cena-hist rv"><img src="img/cena-ponte.jpg" alt="Ponte Hercílio Luz ao pôr do sol, em Florianópolis" loading="lazy"></figure>
+      <figure class="cena-hist rv"><img class="bg" src="img/cena-ponte-full.jpg" alt="" aria-hidden="true" loading="lazy"><img class="fg" src="img/cena-ponte-full.jpg" alt="Ponte Hercílio Luz ao pôr do sol, em Florianópolis" loading="lazy"></figure>
     </article>
 
     <article class="feature fullw">
@@ -650,8 +650,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 
   <!-- CTA -->
   <section class="sec dark cta" id="contato">
-    <p class="lbl rv" style="text-align:center">Contato</p>
-    <h2 class="big typed" id="typed-cta" aria-label="Tem um lançamento no horizonte? Vamos conversar.">Tem um lançamento no horizonte? Vamos conversar.</h2>
+        <h2 class="big typed" id="typed-cta" aria-label="Vamos construir o próximo capítulo da sua incorporadora?">Vamos construir o próximo capítulo da sua incorporadora?</h2>
     <p class="rv" style="max-width:40ch;margin:26px auto 0;text-align:center">Em 30 minutos mostramos como seríamos a extensão do seu time nesse lançamento.</p>
     <div class="btns rv">
       <a class="btn solid" href="https://wa.me/5548988008769?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20AMAX%20e%20gostaria%20de%20saber%20mais.%20Podemos%20conversar%3F" target="_blank" rel="noopener">Falar no WhatsApp</a>
