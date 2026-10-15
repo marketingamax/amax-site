@@ -79,10 +79,9 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .claim { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); z-index:5; font-size:clamp(13px,2vw,36px); will-change:opacity,transform; }
   .claim-text { display:flex; align-items:center; justify-content:center; gap:.5em; text-align:center; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:400; font-size:1em; line-height:1.08; letter-spacing:-.05em; white-space:nowrap; color:#fff; text-shadow:0 2px 24px rgba(0,0,0,.3); }
   .ct { display:grid; grid-template-columns:1fr 1fr; column-gap:calc(4.2vw + 90px); white-space:nowrap; }
-  .ct > span { display:flex; align-items:center; gap:.5em; }
-  .ct > span:first-child { justify-content:flex-end; } .ct > span:last-child { justify-content:flex-start; }
-  .ct > span:first-child::before { content:"("; } .ct > span:last-child::after { content:")"; }
-  .ct > span::before, .ct > span::after { font-size:3.2em; font-weight:300; line-height:1; letter-spacing:0; transform:scaleX(.7) translateY(-.04em); }
+  .ct > span { position:relative; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 1.7em; }
+  .ct > span:first-child::before { content:"("; left:0; } .ct > span:last-child::after { content:")"; right:0; }
+  .ct > span::before, .ct > span::after { position:absolute; top:50%; font-size:3.2em; font-weight:300; line-height:1; letter-spacing:0; transform:translateY(-52%) scaleX(.7); }
   .claim-text::before, .claim-text::after { display:none; }
   @media (max-width:820px){ .ct { display:flex; flex-direction:column; align-items:center; } .ct > span::before, .ct > span::after { display:none; } .claim-text::before, .claim-text::after { display:block; } }
   .claim-text::before, .claim-text::after { font-size:3.2em; font-weight:300; line-height:1; letter-spacing:0; transform:scaleX(.7) translateY(-.04em); }
