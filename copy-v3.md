@@ -45,7 +45,7 @@ Conhecemos o risco, o cronograma e a pressão de lançar por dentro. Por isso a 
 ## 7. O ecossistema
 **Uma incorporadora inteira. *Posicionada por nós.***
 Na Cena, construímos a comunicação de três marcas: locações, empreendimentos e urbanismo. Dela saíram Le Rêve, Nextto, ARKKI, Ybirá, Casa Ruth e Liebe.
-→ **[X lançamentos]** · **+R$ 1 bi em VGV sob gestão de marketing**
+→ **+R$ 1.000.000.000 em VGV sob gestão de marketing** (número com efeito de contagem)
 
 [Faixa de imagens com os 6 projetos]
 
