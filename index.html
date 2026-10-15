@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMAX</title>
+<style>
+  :root { --bg:#000; --fg:#fff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { background:var(--bg); color:var(--fg); font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+
+  /* altura total do scroll = duração da animação */
+  .scroll-track { height:720vh; position:relative; }
+  .stage { position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; background:#000; }
+
+  /* mundo que dá zoom (foto + nuvens) */
+  .world { position:absolute; inset:0; will-change:transform; transform-origin:50% 50%; }
+  .world { filter:grayscale(1); }
+  .photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 50%; display:block; }
+
+  /* nuvens em movimento: camadas de névoa procedural em loop */
+  .fog { position:absolute; left:0; right:0; bottom:-4%; height:78%; pointer-events:none;
+         background-repeat:repeat-x; background-size:auto 100%; will-change:background-position;
+         -webkit-mask-image:linear-gradient(to top,#000 35%,transparent 100%);
+                 mask-image:linear-gradient(to top,#000 35%,transparent 100%); }
+  .fog.back  { opacity:.55; animation:drift 140s linear infinite; mix-blend-mode:screen; }
+  .fog.mid   { opacity:.5;  animation:drift 90s linear infinite reverse; height:66%; }
+  .fog.front { opacity:.85; animation:drift 55s linear infinite; height:50%; bottom:-8%; }
+  .skyfog    { position:absolute; left:0; right:0; top:0; height:55%; opacity:.28; mix-blend-mode:soft-light;
+               background-repeat:repeat-x; background-size:auto 100%; animation:drift 200s linear infinite;
+               pointer-events:none; }
+  @keyframes drift { from { background-position-x:0 } to { background-position-x:var(--w,1600px) } }
+
+  /* camada de nuvem que passa por cima ao entrar no prédio */
+  .rush { position:absolute; inset:-20%; pointer-events:none; opacity:0; will-change:transform,opacity;
+          background-repeat:repeat; background-size:900px auto; animation:driftRush 60s linear infinite; }
+  @keyframes driftRush { to { background-position:900px 0 } }
+  .vignette { position:absolute; inset:0; pointer-events:none;
+              background:radial-gradient(ellipse at 50% 55%, transparent 40%, rgba(0,0,0,.55) 100%); }
+  /* cartas girando na tela preta */
+  .cards { position:absolute; inset:0; pointer-events:none; opacity:0; }
+  .cur { position:absolute; left:0; top:0; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%; background:#fff; color:#000; display:grid; place-items:center; font-size:13px; font-weight:500; letter-spacing:-.02em; pointer-events:none; z-index:200; opacity:0; will-change:transform,opacity; }
+  .stage.trail { cursor:none; }
+  .card { position:absolute; left:50%; top:50%; height:min(36vh,30vw); aspect-ratio:4/5; overflow:hidden; border-radius:2px; will-change:transform,opacity; backface-visibility:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  @media (max-width:820px){ .card { height:min(34vh,56vw); } }
+  /* cena do header: textos, tags, cartas no cursor e logo cortado embaixo */
+  .globe { position:absolute; inset:0; z-index:2; opacity:0; pointer-events:none; }
+  .scene { position:absolute; inset:0; z-index:3; opacity:0; pointer-events:none; color:#fff; letter-spacing:-.03em; }
+  .scene h2 { position:absolute; top:var(--pad); font-weight:400; font-size:clamp(15px,1.55vw,30px); line-height:1.1; max-width:42vw; }
+  .scene .sc-l { left:var(--pad); }
+  .scene .sc-r { right:var(--pad); text-align:right; }
+  .scene .tag { position:absolute; top:50%; font-size:clamp(11px,.9vw,15px); line-height:1.25; transform:translateY(-50%); }
+  .scene .tag.l { left:var(--pad); }
+  .scene .tag.r { right:var(--pad); text-align:right; }
+  .sc-logo { position:absolute; left:var(--pad); right:var(--pad); bottom:0; z-index:2; transform:translateY(26%); overflow:hidden; }
+  .sc-logo img { display:block; width:100%; height:auto; clip-path:inset(0 100% 0 0); will-change:clip-path; }
+  .cards-logo { position:absolute; left:0; top:0; width:clamp(110px,10vw,220px); z-index:6; mix-blend-mode:difference; pointer-events:none; opacity:0; will-change:transform,opacity; }
+  @media (max-width:820px){ .scene h2 { max-width:46vw; font-size:14px; } .sc-logo { transform:translateY(18%); } }
+  .blackout { position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; }
+
+  .claim { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); z-index:5; font-size:clamp(13px,2vw,36px); will-change:opacity,transform; }
+  .claim-text { display:flex; align-items:center; justify-content:center; gap:.5em; text-align:center; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:400; font-size:1em; line-height:1.08; letter-spacing:-.05em; white-space:nowrap; color:#fff; text-shadow:0 2px 24px rgba(0,0,0,.3); }
+  .claim-text::before, .claim-text::after { font-size:3.2em; font-weight:300; line-height:1; letter-spacing:0; transform:scaleX(.7) translateY(-.04em); }
+  .claim-text::before { content:"("; }
+  .claim-text::after  { content:")"; }
+
+  /* UI */
+  .nav { position:absolute; top:0; left:0; right:0; padding:28px clamp(20px,4vw,56px); display:flex; justify-content:space-between; align-items:center; z-index:5; will-change:opacity; }
+  .nav img { height:20px; width:auto; display:block; }
+  .nav span { font-size:12px; letter-spacing:.22em; text-transform:uppercase; opacity:.8; }
+  .hint { position:absolute; left:50%; bottom:34px; transform:translateX(-50%); z-index:5; text-align:center; font-size:11px; letter-spacing:.3em; text-transform:uppercase; will-change:opacity; }
+  .hint i { display:block; width:1px; height:46px; margin:12px auto 0; background:linear-gradient(#fff,transparent); animation:pulse 2s ease-in-out infinite; transform-origin:top; }
+  @keyframes pulse { 0%{transform:scaleY(0)} 50%{transform:scaleY(1)} 100%{transform:scaleY(1);opacity:0} }
+  .tagline { position:absolute; left:clamp(20px,4vw,56px); bottom:34px; z-index:5; font-size:clamp(13px,1.2vw,16px); line-height:1.4; max-width:320px; opacity:.9; will-change:opacity,transform; text-shadow:0 1px 12px rgba(0,0,0,.4); }
+
+  @media (prefers-reduced-motion:reduce){ .fog,.skyfog,.rush{animation:none} }
+
+  /* ================= SITE (pós-hero) ================= */
+  :root { --pad:clamp(16px,1.6vw,28px); }
+  html { scroll-behavior:smooth; }
+  .site { position:relative; z-index:1; background:#000; color:#fff; letter-spacing:-.03em; font-size:clamp(15px,1.05vw,18px); line-height:1.25; }
+  .site a { color:inherit; text-decoration:none; }
+  .site img { display:block; width:100%; height:100%; object-fit:cover; }
+  .serif { font-style:normal; font-weight:inherit; }
+  .ph { background:rgba(255,205,0,.28); border-bottom:1px dashed currentColor; padding:0 .2em; font-style:normal; }
+
+  .nav2 { position:fixed; top:0; left:0; right:0; z-index:60; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:18px var(--pad); color:#fff; mix-blend-mode:difference; font-size:15px; letter-spacing:-.02em; opacity:0; pointer-events:none; transition:opacity .5s; }
+  .nav2.on { opacity:1; pointer-events:auto; }
+  .nav2 a { color:inherit; text-decoration:none; }
+  .nav2 .mid { display:flex; gap:14px; }
+  .nav2 .r { justify-self:end; }
+  .nav2 img { height:15px; width:auto; }
+
+  .sec { padding:clamp(90px,13vw,220px) var(--pad); }
+  .dark { background:#000; color:#fff; }
+  .light { background:#fff; color:#000; }
+  .big { font-size:clamp(34px,5.2vw,96px); line-height:1.02; letter-spacing:-.05em; font-weight:400; }
+  .mid-t { font-size:clamp(26px,3.4vw,60px); line-height:1.05; letter-spacing:-.045em; font-weight:400; }
+  .small { font-size:clamp(13px,.95vw,16px); line-height:1.3; }
+  .lbl { font-size:13px; opacity:.6; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:var(--pad); }
+  .two .r { text-align:right; }
+
+  /* problema */
+  .problem .meta { display:flex; justify-content:space-between; margin-top:clamp(120px,22vw,380px); }
+  .problem .lede { margin:clamp(80px,12vw,200px) 0 0 auto; max-width:34ch; font-size:clamp(18px,1.6vw,26px); line-height:1.15; }
+
+  .quote { padding-top:clamp(130px,18vw,300px); padding-bottom:clamp(130px,18vw,300px); }
+  .typed { text-align:center; max-width:25em; margin:0 auto; font-size:clamp(22px,3vw,54px); line-height:1.08; text-wrap:balance; }
+  .typed .ch { opacity:0; }
+  .typed .ch.on { opacity:1; }
+  .typed .ch.last::after { content:""; display:inline-block; width:.06em; height:.9em; margin-left:.05em; background:currentColor; vertical-align:-.08em; animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  /* tese */
+  .tese .stmt { text-indent:22vw; }
+  .tese .cols { display:grid; grid-template-columns:1fr 1fr; gap:var(--pad); margin-top:clamp(60px,9vw,160px); }
+  .tese .cols p { max-width:36ch; }
+
+  /* rastro de imagens no mouse */
+  .trail-area { position:relative; height:clamp(380px,78vh,820px); margin:clamp(40px,6vw,100px) calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); overflow:hidden; cursor:none; touch-action:pan-y; }
+  .trail-pill { position:absolute; left:0; top:0; z-index:500; display:flex; align-items:center; gap:10px; background:#000; color:#fff; border-radius:999px; padding:9px 14px; font-size:12px; letter-spacing:-.01em; white-space:nowrap; pointer-events:none; will-change:transform; }
+  .trail-pill b { font-weight:500; font-size:14px; }
+  .dark .trail-pill { background:#fff; color:#000; }
+  .trail-img { position:absolute; left:0; top:0; width:clamp(120px,15vw,260px); aspect-ratio:4/5; overflow:hidden; border-radius:2px; pointer-events:none; will-change:transform,opacity; transition:opacity .45s ease; }
+  .trail-img img { width:100%; height:100%; object-fit:cover; display:block; }
+  /* faixa de imagens */
+  .strip { display:flex; gap:8px; padding:0 8px; background:#fff; }
+  .strip figure { flex:1; height:clamp(200px,34vw,560px); overflow:hidden; border-radius:2px; }
+  .strip-cap { display:flex; justify-content:space-between; padding:14px var(--pad) 0; background:#fff; color:#000; }
+
+  /* cases */
+  .cases-head { display:grid; grid-template-columns:1fr 1fr; gap:var(--pad); margin-bottom:clamp(70px,10vw,170px); }
+  .feature { display:grid; grid-template-columns:5fr 7fr; gap:clamp(24px,5vw,90px); margin-bottom:clamp(100px,14vw,240px); align-items:start; }
+  .feature.rev { grid-template-columns:7fr 5fr; }
+  .feature.rev .txt { order:2; }
+  .feature .txt { position:sticky; top:90px; }
+  .feature h3 { font-size:clamp(30px,3.6vw,64px); line-height:1.02; letter-spacing:-.05em; font-weight:400; margin:14px 0 26px; }
+  .feature dl { display:grid; grid-template-columns:auto 1fr; gap:10px 22px; margin-top:34px; border-top:1px solid currentColor; padding-top:18px; }
+  .feature dt { opacity:.55; } .feature dd { margin:0; }
+  .feature .soon { margin-top:30px; padding:14px 16px; border:1px solid currentColor; border-radius:999px; display:inline-block; }
+  /* galeria em faixas: preto e branco, abre colorida no mouse */
+  .acc { display:flex; gap:8px; height:clamp(460px,52vw,760px); }
+  .acc figure { position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:8px; background:#111; cursor:pointer; transition:flex .75s cubic-bezier(.2,.7,.1,1); }
+  .acc figure.on { flex:7 1 0; }
+  .acc img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) brightness(.78) contrast(1.05); transform:scale(1.06); transition:filter .7s ease, transform 1s cubic-bezier(.2,.7,.1,1); }
+  .acc figure.on img { filter:none; transform:scale(1); }
+  .acc .lab { position:absolute; top:16px; left:50%; transform:translateX(-50%); writing-mode:vertical-rl; color:#fff; font-size:13px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; opacity:.85; transition:opacity .35s; }
+  .acc figure.on .lab { opacity:0; }
+  .acc figure::after { content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.65), transparent 45%); opacity:0; transition:opacity .6s; pointer-events:none; }
+  .acc figure.on::after { opacity:1; }
+  .acc figcaption { position:absolute; left:18px; right:18px; bottom:18px; z-index:2; color:#fff; opacity:0; transform:translateY(12px); transition:opacity .5s .15s, transform .6s .15s; }
+  .acc figure.on figcaption { opacity:1; transform:none; }
+  .acc figcaption b { display:block; font-weight:500; font-size:clamp(16px,1.4vw,22px); letter-spacing:-.03em; margin-bottom:4px; }
+  .acc figcaption span { display:block; font-size:clamp(12px,.95vw,15px); opacity:.85; max-width:42ch; }
+  @media (max-width:820px){ .acc { height:420px; } .acc figure.on { flex:5 1 0; } }
+  .gal { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+  .gal figure { overflow:hidden; border-radius:2px; background:#ddd; }
+  .gal .a { grid-column:span 6; aspect-ratio:16/9; }
+  .gal .b { grid-column:span 3; aspect-ratio:4/3; }
+  .gal .c { grid-column:span 2; aspect-ratio:3/4; }
+  .gal .d { grid-column:span 4; aspect-ratio:4/3; }
+  .gal .e { grid-column:span 3; aspect-ratio:3/4; }
+  /* carrossel 3D de projetos */
+  .cf-wrap { background:#f2f1f0; margin:0 calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); padding:clamp(50px,7vw,110px) var(--pad); overflow:hidden; }
+  .cf-stage { position:relative; height:clamp(260px,31vw,480px); perspective:1500px; }
+  .cf-card { position:absolute; left:50%; top:50%; width:clamp(230px,30vw,470px); aspect-ratio:5/4; margin:0; overflow:hidden; cursor:pointer; backface-visibility:hidden; background:#ddd; transition:transform .9s cubic-bezier(.2,.7,.1,1), opacity .7s ease; will-change:transform,opacity; }
+  .cf-card img { width:100%; height:100%; object-fit:cover; display:block; }
+  .cf-dots { display:flex; justify-content:center; gap:12px; margin-top:clamp(22px,3vw,40px); }
+  .cf-dots button { width:9px; height:9px; border-radius:50%; border:0; padding:0; background:#c9c8c6; cursor:pointer; transition:background .3s, transform .3s; }
+  .cf-dots button.on { background:#000; transform:scale(1.15); }
+  .cf-cap { text-align:center; margin-top:18px; font-size:clamp(14px,1.1vw,18px); color:#000; }
+  .cf-cap b { font-weight:500; } .cf-cap span { opacity:.5; margin-left:.4em; }
+  .more { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:start; }
+  .more figure { aspect-ratio:5/4; overflow:hidden; border-radius:2px; }
+  .more > div:nth-child(2n) { margin-top:clamp(30px,6vw,110px); }
+  .more > div:nth-child(3n) { margin-top:clamp(10px,2.5vw,50px); }
+  .more .cap { margin-top:10px; }
+  .more .yr { opacity:.5; }
+  .more img { transition:transform .8s cubic-bezier(.2,.7,.2,1); }
+  .more > div:hover img { transform:scale(1.05); }
+
+  /* origem */
+  .origem .row { display:grid; grid-template-columns:5fr 7fr; gap:clamp(24px,5vw,90px); align-items:end; }
+  /* prédio 3D em traço de rascunho */
+  .bldg { position:relative; cursor:grab; touch-action:pan-y; background:transparent; user-select:none; }
+  .bldg:active { cursor:grabbing; }
+  .bldg canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .bldg-hint { position:absolute; left:0; bottom:6px; font-size:12px; letter-spacing:.06em; opacity:.55; pointer-events:none; }
+  .org { display:grid; grid-template-columns:1fr minmax(300px,34vw) 1fr; gap:var(--pad); align-items:center; }
+  .org .big { font-size:clamp(28px,3.6vw,68px); }
+  .org-l { text-align:left; } .org-r { text-align:right; }
+  .origem .org figure { max-width:none; width:100%; }
+  .org-p { text-align:center; max-width:46ch; margin:clamp(30px,4vw,70px) auto 0; font-size:clamp(16px,1.35vw,23px); line-height:1.2; }
+  @media (max-width:820px){ .org { grid-template-columns:1fr; } .org-r { text-align:left; } .org figure { order:2; } .org-r { order:3; } }
+  .origem figure { aspect-ratio:3/4; overflow:hidden; border-radius:2px; max-width:520px; }
+  .origem .p { max-width:44ch; margin-top:34px; }
+  .eco { margin-top:clamp(120px,16vw,280px); }
+  .marq { overflow:hidden; white-space:nowrap; }
+  .marq .t { display:inline-flex; gap:8px; animation:mq 46s linear infinite; padding-right:8px; }
+  .marq figure { width:clamp(180px,20vw,340px); aspect-ratio:5/4; overflow:hidden; flex:none; border-radius:2px; }
+  @keyframes mq { to { transform:translateX(-100%); } }
+  .eco .typed { font-size:clamp(30px,4.4vw,80px); max-width:16em; line-height:1.04; letter-spacing:-.05em; }
+  .stats { display:flex; gap:clamp(30px,8vw,160px); margin-top:clamp(40px,6vw,100px); flex-wrap:wrap; }
+  .stats b { display:block; font-weight:400; font-size:clamp(30px,4vw,72px); letter-spacing:-.05em; line-height:1; }
+  .wide { margin-top:clamp(50px,6vw,100px); aspect-ratio:21/6; overflow:hidden; border-radius:2px; }
+
+  /* produtos */
+  .prod { border-top:1px solid #000; }
+  .prod .it { display:grid; grid-template-columns:1fr 1fr; gap:var(--pad); padding:clamp(28px,4vw,64px) var(--pad); margin:0 calc(var(--pad) * -1); border-bottom:1px solid #000; background:#fff; color:#000; transition:background .35s ease, color .35s ease; }
+  .prod .it:hover { background:#000; color:#fff; }
+  .prod .it:hover summary { border-color:#fff; }
+  .prod .it:hover details[open] summary { background:#fff; color:#000; }
+  .prod .it:hover li { border-top-color:rgba(255,255,255,.22); }
+  .prod h3 { font-size:clamp(24px,2.8vw,48px); line-height:1.05; letter-spacing:-.045em; font-weight:400; }
+  .prod h3 span { opacity:.5; margin-right:.5em; }
+  .prod .tx { max-width:46ch; }
+  .prod .tx .para { margin-top:18px; }
+  .prod details { margin-top:22px; }
+  .prod summary { cursor:pointer; list-style:none; display:inline-block; border:1px solid #000; border-radius:999px; padding:8px 16px; transition:border-color .35s, background .35s, color .35s; }
+  .prod summary::-webkit-details-marker { display:none; }
+  .prod details[open] summary { background:#000; color:#fff; }
+  .prod ul { list-style:none; margin-top:18px; }
+  .prod li { padding:7px 0; border-top:1px solid rgba(0,0,0,.15); }
+
+  /* etapas */
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--pad); margin-top:clamp(60px,9vw,150px); }
+  .steps > div { position:relative; padding-top:16px; }
+  .steps > div::before { content:""; position:absolute; top:0; left:0; right:0; height:1px; background:#fff; transform:scaleX(0); transform-origin:left; transition:transform .9s cubic-bezier(.2,.7,.1,1); }
+  .steps > div > * { opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .8s cubic-bezier(.2,.7,.1,1); }
+  .steps > div.on::before { transform:none; }
+  .steps > div.on > * { opacity:1; transform:none; }
+  .steps > div > :nth-child(2) { transition-delay:.12s; }
+  .steps > div > :nth-child(3) { transition-delay:.24s; }
+  .steps-sec { position:relative; height:340vh; }
+  .steps-pin { position:sticky; top:0; height:100vh; display:flex; flex-direction:column; justify-content:center; padding:0 var(--pad); }
+  .steps-pin .steps { margin-top:clamp(50px,8vw,140px); }
+  .steps .n { opacity:.55; margin-bottom:60px; }
+  .steps h4 { font-weight:400; font-size:clamp(22px,2.2vw,38px); letter-spacing:-.045em; margin-bottom:12px; }
+
+  /* time */
+  .team { display:grid; grid-template-columns:1fr minmax(260px,46vw) 1fr; gap:clamp(20px,4vw,70px); align-items:end; }
+  .team figure { aspect-ratio:16/10; overflow:hidden; border-radius:2px; }
+  .team figure img { filter:grayscale(1) contrast(1.05); transform:scale(1.03); transition:filter .9s ease, transform 1.2s cubic-bezier(.2,.7,.1,1); }
+  .team figure:hover img { filter:none; transform:scale(1); }
+  @media (hover:none) { .team figure img { filter:none; transform:none; } }
+  .team .who b { display:block; font-weight:400; font-size:clamp(22px,2.2vw,38px); letter-spacing:-.045em; }
+  .team .who .role { opacity:.55; margin-bottom:20px; display:block; }
+  .team .who.r { text-align:right; }
+
+  /* equipe passando ao fundo */
+  .team-sec { position:relative; overflow:hidden; }
+  .team { position:relative; z-index:2; }
+  .team figure { border-radius:22px; box-shadow:0 30px 90px rgba(0,0,0,.7); }
+  .crew { position:absolute; inset:0; z-index:0; display:flex; flex-direction:column; justify-content:space-between; padding:clamp(26px,3.4vw,56px) 0; opacity:.18; pointer-events:none; -webkit-mask-image:linear-gradient(to right,transparent,#000 12%,#000 88%,transparent); mask-image:linear-gradient(to right,transparent,#000 12%,#000 88%,transparent); }
+  .crew .row { display:flex; white-space:nowrap; overflow:hidden; }
+  .crew .t { display:flex; gap:16px; padding-right:16px; flex:none; animation:mq 90s linear infinite; }
+  .crew .row.b .t { animation-direction:reverse; animation-duration:110s; }
+  .crew .cc { width:clamp(120px,14vw,240px); flex:none; color:#fff; }
+  .crew .cc img { width:100%; aspect-ratio:1; object-fit:cover; display:block; filter:grayscale(1); }
+  .crew .cc figcaption { margin-top:8px; font-size:clamp(9px,.75vw,12px); text-transform:uppercase; line-height:1.2; letter-spacing:-.01em; }
+  .crew .cc figcaption b { display:block; font-weight:600; }
+  .crew .cc figcaption span { font-size:.75em; opacity:.7; }
+  /* cta */
+  .cta { overflow:hidden; }
+  .cta .marq { margin:clamp(30px,5vw,80px) 0; }
+  .cta .marq .t { animation-duration:30s; gap:.5em; }
+  .cta .marq span { font-size:clamp(70px,14vw,260px); letter-spacing:-.06em; line-height:1; }
+  .cta .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:34px; justify-content:center; }
+  .cta .typed { font-size:clamp(34px,5.2vw,96px); max-width:15em; line-height:1.02; letter-spacing:-.05em; margin:14px auto 0; }
+  .btn { border:1px solid #fff; border-radius:999px; padding:14px 22px; transition:background .25s,color .25s; }
+  .btn:hover, .btn.solid { background:#fff; color:#000; }
+  .btn.solid:hover { background:transparent; color:#fff; }
+  .ticker { overflow:hidden; white-space:nowrap; margin:clamp(50px,7vw,110px) calc(var(--pad) * -1) 0; padding:clamp(18px,2.4vw,36px) 0; border-top:1px solid rgba(255,255,255,.25); border-bottom:1px solid rgba(255,255,255,.25); }
+  .ticker .t { display:inline-flex; animation:mq 42s linear infinite; }
+  .tk { display:inline-flex; align-items:center; gap:clamp(14px,1.6vw,28px); padding-right:clamp(40px,5vw,90px); }
+  .tk b { font-weight:400; font-size:clamp(28px,3.4vw,60px); letter-spacing:-.05em; line-height:1; }
+  .tk i { font-style:normal; font-size:clamp(11px,.95vw,15px); line-height:1.15; opacity:.85; }
+  .foot2 { display:grid; grid-template-columns:auto 1fr 1fr 1fr; gap:var(--pad); align-items:end; margin-top:clamp(40px,5vw,80px); }
+  .foot2 img { width:clamp(90px,10vw,160px); height:auto; }
+  .foot2 .small { opacity:.7; }
+  @media (max-width:820px){ .foot2 { grid-template-columns:1fr 1fr; } .foot2 img { grid-column:1 / -1; } }
+  /* rodapé halftone */
+  .hwf-root { position:relative; width:100%; overflow:hidden; isolation:isolate; background:var(--hwf-bg); color:var(--hwf-ink); -webkit-font-smoothing:antialiased; }
+  .hwf-root canvas { position:absolute; inset:0; width:100%; height:100%; display:block; max-width:none; }
+  .hwf-top { position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1.25fr) repeat(3,minmax(0,1fr)); gap:24px; padding:clamp(22px,3.4vw,40px) clamp(20px,3.4vw,44px) 0; font-family:var(--hwf-mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; line-height:1.75; }
+  .hwf-brand strong { display:block; font-weight:500; }
+  .hwf-brand span { opacity:.45; }
+  .hwf-col h3 { margin:0; font:inherit; opacity:.4; font-weight:500; }
+  .hwf-col ul { list-style:none; margin:0; padding:0; }
+  .hwf-col a, .hwf-up { color:inherit; text-decoration:none; opacity:.78; background:none; border:0; padding:0; font:inherit; letter-spacing:inherit; text-transform:inherit; cursor:pointer; background-image:linear-gradient(currentColor,currentColor); background-size:0% 1px; background-repeat:no-repeat; background-position:0 100%; transition:opacity .25s ease, background-size .35s cubic-bezier(.2,.7,.1,1); }
+  .hwf-col a:hover, .hwf-up:hover { opacity:1; background-size:100% 1px; }
+  .hwf-col a:focus-visible, .hwf-up:focus-visible { outline:1px solid currentColor; outline-offset:3px; opacity:1; }
+  .hwf-rule { position:relative; z-index:1; display:flex; justify-content:flex-end; align-items:center; gap:16px; margin:clamp(18px,2.6vw,30px) clamp(20px,3.4vw,44px) 0; padding-top:12px; border-top:.5px solid color-mix(in srgb, var(--hwf-ink) 16%, transparent); font-family:var(--hwf-mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; }
+  .hwf-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  @media (max-width:720px) { .hwf-top { grid-template-columns:minmax(0,1fr) minmax(0,1fr); row-gap:18px; } .hwf-brand { grid-column:1 / -1; } }
+  .foot-logo { margin-top:clamp(70px,10vw,160px); }
+  .foot-logo img { height:auto; }
+  .foot { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-top:30px; opacity:.6; font-size:13px; }
+
+  .rv { opacity:0; transform:translateY(28px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .rv.in { opacity:1; transform:none; }
+
+  @media (max-width:820px) {
+    .team figure { aspect-ratio:4/3; }
+    .two, .tese .cols, .cases-head, .feature, .feature.rev, .origem .row, .prod .it { grid-template-columns:1fr; }
+    .two .r { text-align:left; }
+    .feature.rev .txt { order:0; } .feature .txt { position:static; }
+    .more { grid-template-columns:repeat(2,1fr); }
+    .steps { grid-template-columns:1fr 1fr; }
+    .team { grid-template-columns:1fr; } .team .who.r { text-align:left; } .team figure { order:-1; }
+    .strip figure:nth-child(n+4) { display:none; }
+    .nav2 .mid { display:none; } .nav2 { grid-template-columns:1fr 1fr; }
+    .tese .stmt { text-indent:0; }
+  }
+
+</style>
+</head>
+<body>
+
+<nav class="nav2" id="nav2">
+  <a href="#topo"><img src="amax-logo.svg" alt="AMAX"></a>
+  <div class="mid"><a href="#cases">Cases</a><a href="#produtos">Produtos</a><a href="#sobre">Sobre</a></div>
+  <a class="r" href="https://wa.me/5548988008769?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Quero%20entender%20mais%20sobre%20a%20AMAX." target="_blank" rel="noopener">Falar com a AMAX</a>
+</nav>
+<div class="scroll-track" id="track">
+  <div class="stage" id="stage">
+    <div class="world" id="world">
+      <img class="photo" id="photo" src="predio-hero.jpg" alt="Prédio entre as nuvens">
+      <div class="skyfog" data-cloud="sky"></div>
+      <div class="fog back"  data-cloud="a"></div>
+      <div class="fog mid"   data-cloud="b"></div>
+    </div>
+    <div class="world fogworld" id="fogworld" style="pointer-events:none">
+      <div class="fog front" data-cloud="c"></div>
+    </div>
+    <div class="rush" id="rush" data-cloud="rush"></div>
+    <div class="vignette"></div>
+    <div class="blackout" id="blackout"></div>
+
+    <canvas id="globe" class="globe" aria-hidden="true"></canvas>
+    <div class="scene" id="scene">
+      <h2 class="sc-l">Sua empresa pode ter o melhor produto.</h2>
+      <h2 class="sc-r">Mas se a marca não convencer, o VGV some.</h2>
+      <div class="tag l">Extensão estratégica<br>da incorporadora.</div>
+      <div class="tag r">Florianópolis<br><span class="clock">—</span></div>
+    </div>
+    <div class="claim" id="claim">
+      <h1 class="claim-text">Visão de Incorporadora,<br>não de Agência.</h1>
+    </div>
+    <div class="hint" id="hint">Scroll<i></i></div>
+  </div>
+</div>
+
+<main class="site" id="topo">
+
+  <!-- TESE -->
+  <section class="sec light quote" id="sobre">
+    <p class="mid-t typed" id="typed" aria-label="Antes de falar com o corretor, o comprador já decidiu se o seu preço faz sentido. A identidade do empreendimento é o primeiro metro quadrado vendido.">Antes de falar com o corretor, o comprador já decidiu se o seu preço faz sentido. A identidade do empreendimento é o primeiro metro quadrado vendido.</p>
+  </section>
+
+  <section class="sec dark tese">
+    <h2 class="big stmt rv">Extensão estratégica da incorporadora. Com um objetivo: <em class="serif">VGV.</em></h2>
+    <div class="cols">
+      <p class="rv">Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, plantas, renders, terreno e concorrência, e decidimos junto com você. A marca vem depois, como consequência da estratégia.</p>
+      <p class="rv">Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?</p>
+    </div>
+    <div class="trail-area" id="trail" data-imgs="img/verso-outdoor.jpg img/arkki-fachada.jpg img/verso-caixa.jpg img/arkki-livro.jpg img/verso-monolito.jpg img/arkki-onibus.jpg img/verso-revista.jpg img/nextto-folder.jpg img/cena-stand.jpg img/arkki-banner.jpg img/verso-render.jpg img/cena-showroom.jpg">
+      <div class="trail-pill" id="trailpill"><b>AMAX</b><span>[ mova o cursor ]</span></div>
+    </div>
+  </section>
+
+
+  <!-- CASES -->
+  <section class="sec light" id="cases" style="padding-top:clamp(80px,10vw,170px)">
+    <div class="cases-head">
+      <h2 class="big rv">Cases</h2>
+      <p class="mid-t rv">Trabalho que começou com a tabela e terminou em <em class="serif">VGV.</em></p>
+    </div>
+
+    <article class="feature">
+      <div class="txt rv">
+        <div class="lbl">Case 01 · Verso</div>
+        <h3>Um conceito que não existia na ilha.</h3>
+        <p class="small" style="max-width:44ch">Atuamos como extensão do time da incorporadora. Analisamos a tabela comercial, as plantas e os renders e, em conjunto, decidimos reformular todo o conceito e o branding para algo que ainda não existia na ilha: <span class="ph">[ideia do conceito em uma frase]</span>.</p>
+        <dl class="small">
+          <dt>Antes</dt><dd><span class="ph">[como o empreendimento era posicionado]</span></dd>
+          <dt>O que fizemos</dt><dd>Diagnóstico da tabela e das plantas · novo conceito · naming (Semaco → Verso) · identidade · brandbook · campanha</dd>
+          <dt>Depois</dt><dd><span class="ph">[resultado em número: valor por m², tabela, VSO ou velocidade de vendas]</span></dd>
+        </dl>
+        <div class="soon small">Em breve: mais 2 empreendimentos com a AMAX à frente de tudo. <span class="ph">[nomes ou ano]</span></div>
+      </div>
+      <div class="acc rv">
+        <figure class="on"><img src="img/verso-render.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do empreendimento Verso.</span></figcaption></figure>
+        <figure class=""><img src="img/verso-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>"A ilha tem dois lados." Campanha de lançamento.</span></figcaption></figure>
+        <figure class=""><img src="img/verso-revista.jpg" alt="Revista de lançamento" loading="lazy"><span class="lab">Revista</span><figcaption><b>Revista de lançamento</b><span>Material impresso do empreendimento.</span></figcaption></figure>
+        <figure class=""><img src="img/verso-caixa.jpg" alt="Kit de lançamento" loading="lazy"><span class="lab">Kit</span><figcaption><b>Kit de lançamento</b><span>"O outro lado da ilha." Caixa para corretores e clientes.</span></figcaption></figure>
+        <figure class=""><img src="img/verso-guindaste.jpg" alt="Canteiro" loading="lazy"><span class="lab">Canteiro</span><figcaption><b>Canteiro</b><span>A marca presente na obra.</span></figcaption></figure>
+        <figure class=""><img src="img/verso-monolito.jpg" alt="Totem de entrada" loading="lazy"><span class="lab">Totem</span><figcaption><b>Totem de entrada</b><span>Identidade aplicada no espaço.</span></figcaption></figure>
+      </div>
+    </article>
+
+    <article class="feature rev">
+      <div class="txt rv">
+        <div class="lbl">Case 02 · ARKKI</div>
+        <h3><em class="serif">70%</em> das unidades vendidas em 6 meses.</h3>
+        <p class="small" style="max-width:44ch">Conduzimos o lançamento desde a concepção: diagnóstico estratégico, posicionamento do empreendimento, estratégia comercial e execução de cada etapa.</p>
+        <dl class="small">
+          <dt>VGV</dt><dd><span class="ph">[valor]</span></dd>
+          <dt>Unidades</dt><dd><span class="ph">[número]</span></dd>
+          <dt>Leads</dt><dd><span class="ph">[número]</span></dd>
+        </dl>
+      </div>
+      <div class="acc rv">
+        <figure class="on"><img src="img/arkki-fachada.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>ARKKI, o empreendimento.</span></figcaption></figure>
+        <figure class=""><img src="img/arkki-onibus.jpg" alt="Mídia em ônibus" loading="lazy"><span class="lab">Ônibus</span><figcaption><b>Mídia em ônibus</b><span>"O centro mudou." Campanha de lançamento.</span></figcaption></figure>
+        <figure class=""><img src="img/arkki-banner.jpg" alt="Banner em shopping" loading="lazy"><span class="lab">Banner</span><figcaption><b>Banner em shopping</b><span>Presença na cidade.</span></figcaption></figure>
+        <figure class=""><img src="img/arkki-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>Mídia exterior do lançamento.</span></figcaption></figure>
+        <figure class=""><img src="img/arkki-livro.jpg" alt="Livro do empreendimento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro do empreendimento</b><span>Material de apresentação comercial.</span></figcaption></figure>
+        <figure class=""><img src="img/cena-stand.jpg" alt="Stand de vendas" loading="lazy"><span class="lab">Stand</span><figcaption><b>Stand de vendas</b><span>Showroom e ponto de venda.</span></figcaption></figure>
+      </div>
+    </article>
+
+    <div class="lbl" style="margin-bottom:18px">Mais cases</div>
+    <div class="cf-wrap">
+      <div class="cf" id="cf" aria-roledescription="carrossel">
+        <div class="cf-stage"><figure class="cf-card" data-name="Le Rêve" data-year="Em breve"><img src="img/c-le-reve.jpg" alt="Le Rêve" loading="lazy"></figure><figure class="cf-card" data-name="Nextto" data-year="2026"><img src="img/c-nextto.jpg" alt="Nextto" loading="lazy"></figure><figure class="cf-card" data-name="Liebe" data-year="2026"><img src="img/c-liebe.jpg" alt="Liebe" loading="lazy"></figure><figure class="cf-card" data-name="ARKKI" data-year="2025"><img src="img/c-arkki.jpg" alt="ARKKI" loading="lazy"></figure><figure class="cf-card" data-name="Verso Empreendimentos" data-year="2026"><img src="img/c-verso-emp.jpg" alt="Verso Empreendimentos" loading="lazy"></figure><figure class="cf-card" data-name="Ybirá" data-year="Em breve"><img src="img/c-ybira.jpg" alt="Ybirá" loading="lazy"></figure><figure class="cf-card" data-name="Verso Origem" data-year="Em breve"><img src="img/c-verso-origem.jpg" alt="Verso Origem" loading="lazy"></figure><figure class="cf-card" data-name="Casa Ruth" data-year="Em breve"><img src="img/c-casa-ruth.jpg" alt="Casa Ruth" loading="lazy"></figure></div>
+        <div class="cf-dots" role="tablist"></div>
+        <p class="cf-cap"><b></b> <span></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORIGEM -->
+  <section class="sec dark origem">
+    <div class="org">
+      <h2 class="big org-l rv">8 anos dentro de<br>uma incorporadora.</h2>
+      <figure class="rv bldg" id="bldg" aria-label="Modelo 3D de um edifício em construção. Arraste para girar."><canvas></canvas><span class="bldg-hint">Arraste para girar ↔</span></figure>
+      <h2 class="big org-r rv">Agora,<br>do seu lado.</h2>
+    </div>
+    <p class="org-p rv">Conhecemos o risco, o cronograma e a pressão de lançar por dentro. Por isso a AMAX trabalha como parte do seu time, não como fornecedor.</p>
+
+    <div class="eco">
+      <h2 class="mid-t typed" id="typed-eco" aria-label="Uma incorporadora inteira. Posicionada por nós.">Uma incorporadora inteira. Posicionada por nós.</h2>
+      <p class="small rv" style="max-width:52ch;margin:26px auto 0;text-align:center">Na Cena, construímos a comunicação de três marcas: locações, empreendimentos e urbanismo. Dela saíram Le Rêve, Nextto, ARKKI, Ybirá, Casa Ruth e Liebe.</p>
+      <div class="stats rv" style="justify-content:center;text-align:center"><div><b><span class="ph">[X]</span></b><span class="small">lançamentos</span></div><div><b><span class="ph">[R$ X]</span></b><span class="small">de VGV lançado</span></div></div>
+    </div>
+  </section>
+  <div class="marq" style="background:#000;padding:0 0 8px">
+    <div class="t"><figure><img src="img/c-le-reve.jpg" alt=""></figure><figure><img src="img/c-nextto.jpg" alt=""></figure><figure><img src="img/c-liebe.jpg" alt=""></figure><figure><img src="img/c-arkki.jpg" alt=""></figure><figure><img src="img/c-verso-emp.jpg" alt=""></figure><figure><img src="img/c-ybira.jpg" alt=""></figure><figure><img src="img/c-verso-origem.jpg" alt=""></figure><figure><img src="img/c-casa-ruth.jpg" alt=""></figure></div>
+    <div class="t" aria-hidden="true"><figure><img src="img/c-le-reve.jpg" alt=""></figure><figure><img src="img/c-nextto.jpg" alt=""></figure><figure><img src="img/c-liebe.jpg" alt=""></figure><figure><img src="img/c-arkki.jpg" alt=""></figure><figure><img src="img/c-verso-emp.jpg" alt=""></figure><figure><img src="img/c-ybira.jpg" alt=""></figure><figure><img src="img/c-verso-origem.jpg" alt=""></figure><figure><img src="img/c-casa-ruth.jpg" alt=""></figure></div>
+  </div>
+  <div class="dark" style="padding:8px"><div style="border-radius:2px;overflow:hidden;aspect-ratio:21/6"><img src="img/evento-cena.jpg" alt="Evento Cena" loading="lazy"></div></div>
+
+  <!-- PRODUTOS -->
+  <section class="sec light" id="produtos">
+    <div class="cases-head" style="margin-bottom:clamp(40px,6vw,100px)">
+      <h2 class="big rv">Nossos produtos</h2>
+      <p class="mid-t rv">Quatro produtos. Um mesmo objetivo: <em class="serif">vender mais.</em></p>
+    </div>
+    <div class="prod">
+      <div class="it rv">
+        <h3><span>01 –</span>Lançamento</h3>
+        <div class="tx">
+          <p>Do conceito ao stand. Diagnóstico, naming, posicionamento, identidade e brandbook do empreendimento.</p>
+          <p class="para small"><b style="font-weight:500">Para quem:</b> incorporadoras que vão lançar e precisam de um produto com marca forte.</p>
+          <details><summary class="small">Ver escopo</summary><ul class="small"><li>Imersão estratégica</li><li>Posicionamento e naming</li><li>Identidade visual</li><li>Brandbook do empreendimento</li><li>Direção criativa</li><li>Estrutura do site e landing pages</li></ul></details>
+        </div>
+      </div>
+      <div class="it rv">
+        <h3><span>02 –</span>Marca de Incorporadora</h3>
+        <div class="tx">
+          <p>A marca da empresa, não só a do empreendimento.</p>
+          <p class="para small"><b style="font-weight:500">Para quem:</b> construtoras e incorporadoras que querem ser percebidas como grandes antes de serem grandes.</p>
+          <details><summary class="small">Ver escopo</summary><ul class="small"><li>Diagnóstico estratégico</li><li>Essência e plataforma de marca</li><li>Arquitetura de marcas</li><li>Identidade visual e manual</li><li>Site institucional</li></ul></details>
+        </div>
+      </div>
+      <div class="it rv">
+        <h3><span>03 –</span>Plano Comercial</h3>
+        <div class="tx">
+          <p>Um plano de marketing e vendas ligado à projeção de VGV.</p>
+          <p class="para small"><b style="font-weight:500">Para quem:</b> quem já tem o produto e precisa de estratégia para vendê-lo.</p>
+          <details><summary class="small">Ver escopo</summary><ul class="small"><li>Jornada do cliente</li><li>Canais e verba por canal</li><li>Cronograma de execução</li><li>Captação e nutrição de leads</li><li>Indicadores e dashboard</li></ul></details>
+        </div>
+      </div>
+      <div class="it rv">
+        <h3><span>04 –</span>Operação de Lançamento</h3>
+        <div class="tx">
+          <p>Executamos o que desenhamos: eventos, showroom, mídia, materiais, ativações e relacionamento com corretores.</p>
+          <p class="para small">O corretor que entende o produto vende mais rápido. Por isso conectamos incorporadora, <i>house</i> e imobiliária.</p>
+          <details><summary class="small">Ver escopo</summary><ul class="small"><li>Eventos e ativações</li><li>Showroom e pontos de venda</li><li>Mídia e tráfego pago</li><li>Materiais gráficos e digitais</li><li>Alinhamento com imobiliárias e corretores</li></ul></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO TRABALHAMOS -->
+  <section class="dark steps-sec" id="stepsSec">
+   <div class="steps-pin">
+    <h2 class="big">Quatro etapas. <em class="serif">Um time só.</em></h2>
+    <div class="steps" id="steps">
+      <div><div class="n small">01</div><h4>Imersão</h4><p class="small">Entramos no seu time e entendemos o produto, o terreno, o mercado e o seu cronograma.</p></div>
+      <div><div class="n small">02</div><h4>Posicionamento</h4><p class="small">Definimos o que o empreendimento promete e para quem.</p></div>
+      <div><div class="n small">03</div><h4>Lançamento</h4><p class="small">Marca, materiais, stand e campanha entram no ar.</p></div>
+      <div><div class="n small">04</div><h4>Performance</h4><p class="small">Acompanhamos as vendas e ajustamos a estratégia no caminho.</p></div>
+    </div>
+   </div>
+  </section>
+
+  <!-- TIME -->
+  <section class="sec dark team-sec">
+    <div class="crew" aria-hidden="true"><div class="row a"><div class="t"><figure class="cc"><img src="img/team-ana.jpg" alt="" loading="lazy"><figcaption><b>Ana Ruth Grillo</b><span>CEO</span></figcaption></figure><figure class="cc"><img src="img/team-max.jpg" alt="" loading="lazy"><figcaption><b>Maxmiller Moura</b><span>Sócio fundador</span></figcaption></figure><figure class="cc"><img src="img/team-rafaella.jpg" alt="" loading="lazy"><figcaption><b>Rafaella Amorim</b><span>Gerente executiva</span></figcaption></figure><figure class="cc"><img src="img/team-gabriel.jpg" alt="" loading="lazy"><figcaption><b>Gabriel Xavier</b><span>Head de design</span></figcaption></figure><figure class="cc"><img src="img/team-thiago.jpg" alt="" loading="lazy"><figcaption><b>Thiago Gengnagel</b><span>Head de growth</span></figcaption></figure><figure class="cc"><img src="img/team-bruna.jpg" alt="" loading="lazy"><figcaption><b>Bruna Castro</b><span>Analista de marketing</span></figcaption></figure><figure class="cc"><img src="img/team-nathalia.jpg" alt="" loading="lazy"><figcaption><b>Nathália Gama</b><span>Social media</span></figcaption></figure><figure class="cc"><img src="img/team-jorge.jpg" alt="" loading="lazy"><figcaption><b>Jorge Magalhães</b><span>Editor de vídeo</span></figcaption></figure><figure class="cc"><img src="img/team-thaiana.jpg" alt="" loading="lazy"><figcaption><b>Thaiana Bittencourt</b><span>Analista administrativo</span></figcaption></figure><figure class="cc"><img src="img/team-ellisa.jpg" alt="" loading="lazy"><figcaption><b>Ellisa Braga</b><span>Comercial</span></figcaption></figure></div><div class="t"><figure class="cc"><img src="img/team-ana.jpg" alt="" loading="lazy"><figcaption><b>Ana Ruth Grillo</b><span>CEO</span></figcaption></figure><figure class="cc"><img src="img/team-max.jpg" alt="" loading="lazy"><figcaption><b>Maxmiller Moura</b><span>Sócio fundador</span></figcaption></figure><figure class="cc"><img src="img/team-rafaella.jpg" alt="" loading="lazy"><figcaption><b>Rafaella Amorim</b><span>Gerente executiva</span></figcaption></figure><figure class="cc"><img src="img/team-gabriel.jpg" alt="" loading="lazy"><figcaption><b>Gabriel Xavier</b><span>Head de design</span></figcaption></figure><figure class="cc"><img src="img/team-thiago.jpg" alt="" loading="lazy"><figcaption><b>Thiago Gengnagel</b><span>Head de growth</span></figcaption></figure><figure class="cc"><img src="img/team-bruna.jpg" alt="" loading="lazy"><figcaption><b>Bruna Castro</b><span>Analista de marketing</span></figcaption></figure><figure class="cc"><img src="img/team-nathalia.jpg" alt="" loading="lazy"><figcaption><b>Nathália Gama</b><span>Social media</span></figcaption></figure><figure class="cc"><img src="img/team-jorge.jpg" alt="" loading="lazy"><figcaption><b>Jorge Magalhães</b><span>Editor de vídeo</span></figcaption></figure><figure class="cc"><img src="img/team-thaiana.jpg" alt="" loading="lazy"><figcaption><b>Thaiana Bittencourt</b><span>Analista administrativo</span></figcaption></figure><figure class="cc"><img src="img/team-ellisa.jpg" alt="" loading="lazy"><figcaption><b>Ellisa Braga</b><span>Comercial</span></figcaption></figure></div></div><div class="row b"><div class="t"><figure class="cc"><img src="img/team-bruna.jpg" alt="" loading="lazy"><figcaption><b>Bruna Castro</b><span>Analista de marketing</span></figcaption></figure><figure class="cc"><img src="img/team-nathalia.jpg" alt="" loading="lazy"><figcaption><b>Nathália Gama</b><span>Social media</span></figcaption></figure><figure class="cc"><img src="img/team-jorge.jpg" alt="" loading="lazy"><figcaption><b>Jorge Magalhães</b><span>Editor de vídeo</span></figcaption></figure><figure class="cc"><img src="img/team-thaiana.jpg" alt="" loading="lazy"><figcaption><b>Thaiana Bittencourt</b><span>Analista administrativo</span></figcaption></figure><figure class="cc"><img src="img/team-ellisa.jpg" alt="" loading="lazy"><figcaption><b>Ellisa Braga</b><span>Comercial</span></figcaption></figure><figure class="cc"><img src="img/team-ana.jpg" alt="" loading="lazy"><figcaption><b>Ana Ruth Grillo</b><span>CEO</span></figcaption></figure><figure class="cc"><img src="img/team-max.jpg" alt="" loading="lazy"><figcaption><b>Maxmiller Moura</b><span>Sócio fundador</span></figcaption></figure><figure class="cc"><img src="img/team-rafaella.jpg" alt="" loading="lazy"><figcaption><b>Rafaella Amorim</b><span>Gerente executiva</span></figcaption></figure><figure class="cc"><img src="img/team-gabriel.jpg" alt="" loading="lazy"><figcaption><b>Gabriel Xavier</b><span>Head de design</span></figcaption></figure><figure class="cc"><img src="img/team-thiago.jpg" alt="" loading="lazy"><figcaption><b>Thiago Gengnagel</b><span>Head de growth</span></figcaption></figure></div><div class="t"><figure class="cc"><img src="img/team-bruna.jpg" alt="" loading="lazy"><figcaption><b>Bruna Castro</b><span>Analista de marketing</span></figcaption></figure><figure class="cc"><img src="img/team-nathalia.jpg" alt="" loading="lazy"><figcaption><b>Nathália Gama</b><span>Social media</span></figcaption></figure><figure class="cc"><img src="img/team-jorge.jpg" alt="" loading="lazy"><figcaption><b>Jorge Magalhães</b><span>Editor de vídeo</span></figcaption></figure><figure class="cc"><img src="img/team-thaiana.jpg" alt="" loading="lazy"><figcaption><b>Thaiana Bittencourt</b><span>Analista administrativo</span></figcaption></figure><figure class="cc"><img src="img/team-ellisa.jpg" alt="" loading="lazy"><figcaption><b>Ellisa Braga</b><span>Comercial</span></figcaption></figure><figure class="cc"><img src="img/team-ana.jpg" alt="" loading="lazy"><figcaption><b>Ana Ruth Grillo</b><span>CEO</span></figcaption></figure><figure class="cc"><img src="img/team-max.jpg" alt="" loading="lazy"><figcaption><b>Maxmiller Moura</b><span>Sócio fundador</span></figcaption></figure><figure class="cc"><img src="img/team-rafaella.jpg" alt="" loading="lazy"><figcaption><b>Rafaella Amorim</b><span>Gerente executiva</span></figcaption></figure><figure class="cc"><img src="img/team-gabriel.jpg" alt="" loading="lazy"><figcaption><b>Gabriel Xavier</b><span>Head de design</span></figcaption></figure><figure class="cc"><img src="img/team-thiago.jpg" alt="" loading="lazy"><figcaption><b>Thiago Gengnagel</b><span>Head de growth</span></figcaption></figure></div></div></div>
+    <div class="team">
+      <div class="who rv"><b>Maxmiller Moura</b><span class="role small">Sócio fundador</span><p class="small" style="max-width:34ch">Empresário do setor imobiliário e de tecnologia. Atua na captação, posicionamento e aceleração de vendas.</p></div>
+      <figure class="rv"><img src="img/fundadores-c.jpg" alt="Maxmiller Moura e Ana Ruth Grillo" loading="lazy"></figure>
+      <div class="who r rv"><b>Ana Ruth Grillo</b><span class="role small">CEO</span><p class="small" style="max-width:34ch;margin-left:auto">8 anos na Cena, da estratégia comercial ao lançamento. Especialista em posicionamento, jornada do cliente e performance.</p></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="sec dark cta" id="contato">
+    <p class="lbl rv" style="text-align:center">Contato</p>
+    <h2 class="big typed" id="typed-cta" aria-label="Tem um lançamento no horizonte? Vamos conversar.">Tem um lançamento no horizonte? Vamos conversar.</h2>
+    <p class="rv" style="max-width:40ch;margin:26px auto 0;text-align:center">Em 30 minutos mostramos como seríamos a extensão do seu time nesse lançamento.</p>
+    <div class="btns rv">
+      <a class="btn solid" href="https://wa.me/5548988008769?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Quero%20entender%20mais%20sobre%20a%20AMAX." target="_blank" rel="noopener">Falar no WhatsApp</a>
+      <a class="btn" href="mailto:comercial@amax-lancamentos.com">comercial@amax-lancamentos.com</a>
+    </div>
+  </section>
+  <footer class="hwf-root" id="hwf" style="height:clamp(420px,44vw,640px);--hwf-bg:#000;--hwf-ink:#ecebe8;--hwf-mono:'Helvetica Neue',Helvetica,Arial,sans-serif">
+    <canvas id="hwfCanvas" aria-hidden="true"></canvas>
+    <span class="hwf-sr">AMAX</span>
+    <div class="hwf-top">
+      <div class="hwf-brand"><strong>AMAX</strong><span>©2026 · Florianópolis</span></div>
+      <nav class="hwf-col" aria-label="Navegar"><h3>Navegar</h3><ul><li><a href="#cases">Cases</a></li><li><a href="#produtos">Produtos</a></li><li><a href="#sobre">Sobre</a></li></ul></nav>
+      <nav class="hwf-col" aria-label="Contato"><h3>Contato</h3><ul><li><a href="https://wa.me/5548988008769?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Quero%20entender%20mais%20sobre%20a%20AMAX." target="_blank" rel="noopener">+55 48 98800-8769</a></li><li><a href="mailto:comercial@amax-lancamentos.com">comercial@amax-lancamentos.com</a></li></ul></nav>
+      <nav class="hwf-col" aria-label="Redes"><h3>Redes</h3><ul><li><a href="#">@amax.lancamentosimo</a></li></ul></nav>
+    </div>
+    <div class="hwf-rule"><button type="button" class="hwf-up" id="hwfUp">Voltar ao topo ↑</button></div>
+  </footer>
+</main>
+
+<script src="vendor/d3.min.js">
+</script>
+<script src="vendor/three.min.js"></script>
+<script>
+/* ---------- Nuvens procedurais (ruído periódico → tile sem emenda) ---------- */
+function makeCloudTile(w, h, seed, coverage, sharp) {
+  const rng = (s => () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296)(seed);
+  const octaves = [];
+  const base = [4, 2];            // células em x, y da 1ª oitava
+  for (let o = 0; o < 6; o++) {
+    const gx = base[0] * 2 ** o, gy = base[1] * 2 ** o;
+    const g = new Float32Array(gx * gy);
+    for (let i = 0; i < g.length; i++) g[i] = rng();
+    octaves.push({ gx, gy, g, amp: 0.55 ** o });
+  }
+  const sm = t => t * t * (3 - 2 * t);
+  const val = (o, x, y) => {
+    const fx = x * o.gx, fy = y * o.gy;
+    const x0 = Math.floor(fx), y0 = Math.floor(fy);
+    const tx = sm(fx - x0), ty = sm(fy - y0);
+    const X0 = x0 % o.gx, X1 = (x0 + 1) % o.gx, Y0 = ((y0 % o.gy) + o.gy) % o.gy, Y1 = (y0 + 1) % o.gy;
+    const a = o.g[Y0 * o.gx + X0], b = o.g[Y0 * o.gx + X1], c = o.g[Y1 * o.gx + X0], d = o.g[Y1 * o.gx + X1];
+    return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
+  };
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d'), img = ctx.createImageData(w, h);
+  let norm = 0; octaves.forEach(o => norm += o.amp);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let n = 0;
+      for (const o of octaves) n += val(o, x / w, y / h) * o.amp;
+      n /= norm;
+      let a = (n - coverage) * sharp;            // contraste → volumes de nuvem
+      a = Math.max(0, Math.min(1, a));
+      a = a * a * (3 - 2 * a);
+      // mais denso embaixo, mais leve em cima
+      a *= 0.35 + 0.65 * (y / h);
+      const i = (y * w + x) * 4;
+      const shade = 232 - (1 - n) * 60;           // cinza-azulado nas bordas, branco no miolo
+      img.data[i] = shade; img.data[i + 1] = shade + 4; img.data[i + 2] = shade + 10;
+      img.data[i + 3] = a * 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv.toDataURL('image/png');
+}
+
+const tiles = {
+  sky:  makeCloudTile(512, 128, 11, .50, 3.2),
+  a:    makeCloudTile(768, 256, 7,  .46, 3.6),
+  b:    makeCloudTile(768, 256, 23, .48, 3.8),
+  c:    makeCloudTile(768, 256, 41, .52, 4.4),
+  rush: makeCloudTile(512, 512, 99, .50, 3.4)
+};
+document.querySelectorAll('[data-cloud]').forEach(el => {
+  el.style.backgroundImage = `url(${tiles[el.dataset.cloud]})`;
+});
+// largura do loop = largura renderizada do tile (altura do elemento × proporção do tile)
+function sizeLoops() {
+  document.querySelectorAll('.fog,.skyfog').forEach(el => {
+    const ratio = el.dataset.cloud === 'sky' ? 4 : 3;
+    el.style.setProperty('--w', el.clientHeight * ratio + 'px');
+  });
+}
+
+
+/* ---------- globo wireframe pontilhado (d3) ---------- */
+const globe = (() => {
+  const cv = document.getElementById('globe'), g = cv.getContext('2d');
+  const proj = d3.geoOrthographic().clipAngle(90).precision(0.6);
+  const path = d3.geoPath(proj, g);
+  const grat = d3.geoGraticule()();
+  const FLO = [-48.55, -27.59];                        // Florianópolis
+  let W = 0, H = 0, dpr = 1, R = 0, land = null, dots = [];
+  const inRing = (x, y, ring) => { let ins = false; for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins; } return ins; };
+  const inPoly = (x, y, poly) => { if (!inRing(x, y, poly[0])) return false; for (let i = 1; i < poly.length; i++) if (inRing(x, y, poly[i])) return false; return true; };
+  const inFeat = (x, y, f) => { const ge = f.geometry; if (ge.type === 'Polygon') return inPoly(x, y, ge.coordinates); if (ge.type === 'MultiPolygon') return ge.coordinates.some(p => inPoly(x, y, p)); return false; };
+  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; R = Math.min(W, H) * 0.36; proj.translate([W / 2, H / 2]); }
+  size(); addEventListener('resize', size);
+  fetch('vendor/ne_110m_land.json').then(r => r.json()).then(j => {
+    land = j; const step = 1.25;
+    j.features.forEach(f => { const [[x0, y0], [x1, y1]] = d3.geoBounds(f); for (let lo = x0; lo <= x1; lo += step) for (let la = y0; la <= y1; la += step) if (inFeat(lo, la, f)) dots.push([lo, la]); });
+  }).catch(() => {});
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const ck = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  function draw(gp, alpha, now) {
+    cv.style.opacity = alpha;
+    if (alpha <= 0.002 || !land) return;
+    // rotação guiada pelo scroll: dá voltas e pousa em Florianópolis
+    const e = ease(ck((gp - 0.04) / 0.34));
+    proj.rotate([-FLO[0] + (1 - e) * 450, -FLO[1] * e - 8 * (1 - e)]);
+    // zoom exponencial para dentro da cidade
+    const z = ck((gp - 0.46) / 0.5), zz = z * z * z;
+    const appear = 0.86 + 0.14 * ck(alpha);
+    const sc = R * appear * Math.exp(Math.log(90) * zz);
+    proj.scale(sc);
+    const sf = sc / R;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    g.beginPath(); g.arc(W / 2, H / 2, sc, 0, 6.2832); g.fillStyle = '#000'; g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = Math.min(2 * sf, 6); g.stroke();
+    g.beginPath(); path(grat); g.strokeStyle = '#fff'; g.lineWidth = Math.min(sf, 3); g.globalAlpha = 0.22 * (1 - ck(z * 1.4)); g.stroke(); g.globalAlpha = 1;
+    g.beginPath(); land.features.forEach(f => path(f)); g.strokeStyle = '#fff'; g.lineWidth = Math.min(sf, 3); g.stroke();
+    g.fillStyle = '#9a9a9a'; const dr = Math.min(1.2 * sf, 5);
+    for (let i = 0; i < dots.length; i++) { const p = proj(dots[i]); if (p && p[0] > -10 && p[0] < W + 10 && p[1] > -10 && p[1] < H + 10) { g.beginPath(); g.arc(p[0], p[1], dr, 0, 6.2832); g.fill(); } }
+    // pin sobre Florianópolis
+    const pa = ck((gp - 0.3) / 0.1) * (1 - ck((gp - 0.62) / 0.14));
+    const c = proj(FLO);
+    if (pa > 0.01 && c) {
+      const pulse = (now * 0.9) % 1;
+      g.globalAlpha = pa;
+      g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+      g.beginPath(); g.ellipse(c[0], c[1], 6 + pulse * 26, 3 + pulse * 13, 0, 0, 6.2832); g.globalAlpha = pa * (1 - pulse); g.stroke(); g.globalAlpha = pa;
+      const px = c[0], py = c[1] - 4, r = 9;
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(px, py - 22, r, 0, 6.2832); g.moveTo(px - r * 0.8, py - 22 + r * 0.6); g.lineTo(px, py); g.lineTo(px + r * 0.8, py - 22 + r * 0.6); g.fill();
+      g.fillStyle = '#000'; g.beginPath(); g.arc(px, py - 22, 3.2, 0, 6.2832); g.fill();
+      g.fillStyle = '#fff'; g.font = '500 15px "Helvetica Neue",Helvetica,Arial,sans-serif'; g.textBaseline = 'middle';
+      g.fillText('Florianópolis, SC', px + 18, py - 26); g.globalAlpha = pa * 0.6; g.font = '12px "Helvetica Neue",Helvetica,Arial,sans-serif'; g.fillText('Sede da AMAX', px + 18, py - 8);
+      g.globalAlpha = 1;
+    }
+  }
+  return { draw };
+})();
+
+/* ---------- Scroll → zoom no prédio → tela preta → cartas girando ---------- */
+const $ = id => document.getElementById(id);
+const track = $('track'), world = $('world'), fogworld = $('fogworld'), rush = $('rush'),
+      blackout = $('blackout'), hint = $('hint');
+const stage = $('stage'), scene = $('scene');
+const photo = $('photo'), claim = $('claim');
+
+// ponto do topo do prédio dentro da foto (fração da imagem original 910×1365)
+const TARGET = { x: 0.499, y: 0.34 };
+let origin = { x: 0, y: 0 };
+function computeOrigin() {
+  const W = innerWidth, H = innerHeight;
+  const iw = photo.naturalWidth || 910, ih = photo.naturalHeight || 1365;
+  const s = Math.max(W / iw, H / ih);
+  const dw = iw * s, dh = ih * s;
+  const posY = 0.5;                                   // = object-position y
+  const ox = (W - dw) * 0.5, oy = (H - dh) * posY;
+  origin.x = ox + TARGET.x * dw;
+  origin.y = oy + TARGET.y * dh;
+  world.style.transformOrigin = fogworld.style.transformOrigin = `${origin.x}px ${origin.y}px`;
+}
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const range = (p, a, b) => clamp((p - a) / (b - a));
+const easeIn = t => t * t * t;
+const easeOut = t => 1 - (1 - t) ** 3;
+const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+
+let target = 0, current = 0;
+function readScroll() {
+  const max = track.offsetHeight - innerHeight;
+  target = clamp(scrollY / max);
+}
+function render() {
+  current += (target - current) * 0.09;               // suaviza o scroll
+  if (Math.abs(target - current) < .0002) current = target;
+  const p = current;
+
+  // 1) aproximação: exponencial para dar sensação de voar até o prédio
+  const z = range(p, 0, 0.42);
+  const BASE = 1;                                   // prédio grande no enquadramento inicial
+  const scale = BASE * Math.exp(Math.log(26 / BASE) * easeIn(z) * 0.9);
+  const lift = -innerHeight * 0 * (1 - easeOut(range(p, 0, 0.35)));   // prédio sobe no início
+  world.style.transform = `translateY(${lift}px) scale(${scale})`;
+  // nuvens da frente passam mais rápido (paralaxe) e se afastam da câmera
+  const fs = Math.exp(Math.log(60) * easeIn(range(p, 0, 0.42)));
+  fogworld.style.transform = `scale(${fs})`;
+  fogworld.style.opacity = 1 - range(p, 0.2, 0.36);
+
+  // 2) atravessa uma parede de nuvem antes de escurecer
+  const r = range(p, 0.24, 0.40);
+  rush.style.opacity = Math.sin(r * Math.PI) * 0.9;
+  rush.style.transform = `scale(${1 + r * 2.5})`;
+
+  // 3) tela preta
+  blackout.style.opacity = easeInOut(range(p, 0.32, 0.45));
+
+  // 4) globo: gira até o sul do Brasil, pin em Florianópolis, zoom e "entra" na cidade
+  const sv = range(p, 0.44, 0.54);
+  const gp = range(p, 0.5, 1);
+  scene.style.opacity = sv * (1 - range(p, 0.8, 0.9));
+  globe.draw(gp, sv * (1 - range(p, 0.94, 1)), performance.now() / 1000);
+
+  const c = range(p, 0.02, 0.2);
+  claim.style.opacity = 1 - c;
+  claim.style.transform = `translateY(calc(-50% + ${c * -40}px))`;
+
+  // UI
+  nav2.classList.toggle('on', scrollY > track.offsetHeight - innerHeight + innerHeight * 0.55);
+  hint.style.opacity = 1 - range(p, 0.0, 0.06);
+
+  requestAnimationFrame(render);
+}
+
+function init() { computeOrigin(); sizeLoops(); readScroll(); current = target; }
+addEventListener('scroll', readScroll, { passive: true });
+addEventListener('resize', init);
+photo.complete ? init() : photo.addEventListener('load', init);
+init();
+requestAnimationFrame(render);
+
+/* ---------- site: menu, relógio e revelações ---------- */
+const nav2 = document.getElementById('nav2');
+const clockEls = [...document.querySelectorAll('.clock')];
+function tick(){ try{ const tt = new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'})+' BRT'; clockEls.forEach(c => c.textContent = tt); }catch(e){} }
+tick(); setInterval(tick, 20000);
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin:'0px 0px -8% 0px', threshold:.08 });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+/* ---------- rastro de imagens seguindo o mouse ---------- */
+(function(){
+  const area = document.getElementById('trail'); if (!area) return;
+  const pill = document.getElementById('trailpill');
+  const srcs = area.dataset.imgs.split(' ');
+  srcs.forEach(u => { const i = new Image(); i.src = u; });
+  const pos = { x: 0, y: 0, tx: 0, ty: 0, init: false };
+  let last = null, n = 0, live = [];
+  const place = () => { const r = area.getBoundingClientRect(); return r; };
+  function setPill(){ pill.style.transform = `translate3d(${pos.x}px,${pos.y}px,0) translate(-50%,-50%)`; }
+  function restPos(){ const r = place(); pos.tx = r.width * 0.78; pos.ty = r.height * 0.5; if (!pos.init) { pos.x = pos.tx; pos.y = pos.ty; pos.init = true; } }
+  restPos(); setPill(); addEventListener('resize', restPos);
+  let over = false;
+  area.addEventListener('pointerenter', () => { over = true; });
+  area.addEventListener('pointerleave', () => { over = false; restPos(); });
+  function spawn(x, y){
+    const el = document.createElement('div'); el.className = 'trail-img';
+    const im = document.createElement('img'); im.src = srcs[n % srcs.length]; n++; el.appendChild(im);
+    const rot = (Math.random() - .5) * 12;
+    el.style.zIndex = 10 + n;
+    el.style.opacity = 0;
+    el.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%) rotate(${rot}deg) scale(.6)`;
+    area.appendChild(el);
+    requestAnimationFrame(() => { el.style.transition = 'opacity .35s ease, transform .6s cubic-bezier(.2,.7,.2,1)'; el.style.opacity = 1; el.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%) rotate(${rot}deg) scale(1)`; });
+    live.push(el);
+    setTimeout(() => { el.style.transition = 'opacity .6s ease, transform .8s ease'; el.style.opacity = 0; el.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%) rotate(${rot}deg) scale(.85)`; }, 750);
+    setTimeout(() => { el.remove(); live = live.filter(e => e !== el); }, 1700);
+    while (live.length > 9) { const o = live.shift(); o.remove(); }
+  }
+  area.addEventListener('pointermove', e => {
+    const r = place(), x = e.clientX - r.left, y = e.clientY - r.top;
+    pos.tx = x; pos.ty = y;
+    if (!last || Math.hypot(x - last.x, y - last.y) > Math.max(90, r.width * 0.07)) { spawn(x, y); last = { x, y }; }
+  });
+  (function loop(){ pos.x += (pos.tx - pos.x) * .22; pos.y += (pos.ty - pos.y) * .22; setPill(); requestAnimationFrame(loop); })();
+})();
+
+/* ---------- rodapé halftone (porte do componente Halftone Wordmark Footer) ---------- */
+(function(){
+  const root = document.getElementById('hwf'), canvas = document.getElementById('hwfCanvas');
+  if (!root || !canvas) return;
+  const ctx = canvas.getContext('2d');
+  const O = { ink:'#ecebe8', warm:'#ffffff', bg:'#000000', gap:6, radius:80, crop:0.2, grain:0.5 };
+  const hex = h => { const m=/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(h.trim()); if(!m) return null; const t=m[1].length===3?m[1].split('').map(c=>c+c).join(''):m[1]; return [parseInt(t.slice(0,2),16),parseInt(t.slice(2,4),16),parseInt(t.slice(4,6),16)]; };
+  const dotR = (c,g) => Math.sqrt(Math.max(0,Math.min(1,c))) * g * 0.56;
+  const step = (x,y,vx,vy,hx,hy,px,py,r) => { const dx=x-px, dy=y-py, d2=dx*dx+dy*dy; if (r>0 && d2<r*r){ const d=Math.sqrt(d2)+0.001, f=(1-d/r)*2.6; vx+=dx/d*f; vy+=dy/d*f; } vx=(vx+(hx-x)*0.05)*0.84; vy=(vy+(hy-y)*0.05)*0.84; return [x+vx,y+vy,vx,vy]; };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ink = hex(O.ink), warm = hex(O.warm);
+  const logo = new Image(); logo.src = 'amax-logo.svg';
+  let w=0,h=0,dpr=1,px=-1e5,py=-1e5,raf=0,visible=true,awake=true,ring={x:0,y:0,t:-1},dots=new Float32Array(0),count=0,grainTile=null;
+
+  function layout(){
+    const rect = root.getBoundingClientRect();
+    w = Math.max(1, Math.round(rect.width)); h = Math.max(1, Math.round(rect.height));
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+    const mask = document.createElement('canvas'); mask.width = w; mask.height = h;
+    const m = mask.getContext('2d', { willReadFrequently:true });
+    if (logo.complete && logo.naturalWidth) {
+      const dw = w * 1.02, dh = dw * 889 / 4271;
+      m.drawImage(logo, (w-dw)/2, h + dh*O.crop - dh, dw, dh);
+    }
+    const img = m.getImageData(0,0,w,h).data;
+    const gap = O.gap, cols = Math.ceil(w/gap), rows = Math.ceil(h/gap), tmp = [];
+    for (let gy=0; gy<rows; gy++) for (let gx=0; gx<cols; gx++) {
+      let sum = 0;
+      for (let sy=0; sy<3; sy++) for (let sx=0; sx<3; sx++) {
+        const x = Math.min(w-1, Math.floor(gx*gap + (sx+.5)*gap/3)), y = Math.min(h-1, Math.floor(gy*gap + (sy+.5)*gap/3));
+        sum += img[(y*w+x)*4+3];
+      }
+      const cov = sum/(9*255); if (cov < 0.06) continue;
+      const hx = gx*gap+gap/2, hy = gy*gap+gap/2;
+      tmp.push(hx,hy,0,0,hx,hy,dotR(cov,gap));
+    }
+    dots = new Float32Array(tmp); count = tmp.length/7;
+    grainTile = document.createElement('canvas'); grainTile.width = grainTile.height = 256;
+    const g = grainTile.getContext('2d'), id = g.createImageData(256,256);
+    for (let i=0;i<id.data.length;i+=4){ const v=Math.random()*255; id.data[i]=id.data[i+1]=id.data[i+2]=v; id.data[i+3]=Math.random()<.5?0:255; }
+    g.putImageData(id,0,0); awake = true;
+  }
+  function draw(now){
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.fillStyle = O.bg; ctx.fillRect(0,0,w,h);
+    const r = reduced ? 0 : O.radius, ringAge = ring.t < 0 ? 1e9 : now - ring.t, ringR = ringAge*0.9;
+    let moving = false;
+    for (let i=0;i<count;i++){
+      const j=i*7; let x=dots[j],y=dots[j+1],vx=dots[j+2],vy=dots[j+3]; const hx=dots[j+4],hy=dots[j+5];
+      if (!reduced){
+        if (ringAge < 900){ const dx=hx-ring.x, dy=hy-ring.y, d=Math.sqrt(dx*dx+dy*dy)+0.001, band=1-Math.min(1,Math.abs(d-ringR)/26); if (band>0){ const f=band*3.2*(1-ringAge/900); vx+=dx/d*f; vy+=dy/d*f; } }
+        const s = step(x,y,vx,vy,hx,hy,px,py,r); x=s[0]; y=s[1]; vx=s[2]; vy=s[3];
+        if (Math.abs(vx)+Math.abs(vy)>0.02 || Math.abs(x-hx)+Math.abs(y-hy)>0.05) moving = true; else { x=hx; y=hy; vx=0; vy=0; }
+        dots[j]=x; dots[j+1]=y; dots[j+2]=vx; dots[j+3]=vy;
+      }
+      const k = Math.min(1, Math.hypot(x-hx,y-hy)/28);
+      ctx.fillStyle = k>0.02 ? `rgb(${Math.round(ink[0]+(warm[0]-ink[0])*k)},${Math.round(ink[1]+(warm[1]-ink[1])*k)},${Math.round(ink[2]+(warm[2]-ink[2])*k)})` : O.ink;
+      ctx.beginPath(); ctx.arc(x,y,dots[j+6],0,6.2832); ctx.fill();
+    }
+    if (grainTile && O.grain > 0){ ctx.globalAlpha = O.grain*0.09; ctx.globalCompositeOperation = 'overlay'; const p = ctx.createPattern(grainTile,'repeat'); if (p){ ctx.fillStyle = p; ctx.fillRect(0,0,w,h); } ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+    awake = moving || ringAge < 900 || px > -1e4;
+  }
+  const loop = now => { raf = 0; if (!visible) return; draw(now); if (awake) raf = requestAnimationFrame(loop); };
+  const wake = () => { awake = true; if (!raf && visible) raf = requestAnimationFrame(loop); };
+  const local = e => { const b = canvas.getBoundingClientRect(); return [e.clientX-b.left, e.clientY-b.top]; };
+  root.addEventListener('pointermove', e => { const p = local(e); px=p[0]; py=p[1]; wake(); });
+  root.addEventListener('pointerleave', () => { px=-1e5; py=-1e5; wake(); });
+  root.addEventListener('pointerdown', e => { if (reduced || e.target.closest('a,button')) return; const p = local(e); ring = { x:p[0], y:p[1], t:performance.now() }; wake(); });
+  new ResizeObserver(() => { layout(); wake(); }).observe(root);
+  new IntersectionObserver(es => { visible = es.length ? es[es.length - 1].isIntersecting : true; if (visible) wake(); }).observe(root);
+  const start = () => { layout(); draw(performance.now()); wake(); };
+  logo.complete ? start() : logo.addEventListener('load', start);
+  document.getElementById('hwfUp').addEventListener('click', () => scrollTo({ top:0, behavior:'smooth' }));
+})();
+
+/* ---------- frase com efeito de digitação ---------- */
+document.querySelectorAll('.typed').forEach(function(el){
+  const txt = el.textContent; el.textContent = '';
+  const words = txt.split(' '), chars = [];
+  words.forEach((w, wi) => {
+    const wrap = document.createElement('span'); wrap.style.whiteSpace = 'nowrap';
+    [...w].forEach(c => { const sp = document.createElement('span'); sp.className = 'ch'; sp.textContent = c; wrap.appendChild(sp); chars.push(sp); });
+    el.appendChild(wrap);
+    if (wi < words.length - 1) { const sp = document.createElement('span'); sp.className = 'ch'; sp.textContent = ' '; el.appendChild(sp); chars.push(sp); }
+  });
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let started = false;
+  function type(){
+    let i = 0;
+    const tick = () => {
+      if (i > 0) chars[i - 1].classList.remove('last');
+      if (i >= chars.length) { chars[chars.length - 1].classList.add('last'); return; }
+      chars[i].classList.add('on', 'last'); i++;
+      setTimeout(tick, /[.,]/.test(chars[i - 1].textContent) ? 260 : 28 + Math.random() * 26);
+    };
+    tick();
+  }
+  new IntersectionObserver((es, o) => { if (!started && es.some(e => e.isIntersecting)) { started = true; o.disconnect(); if (reduced) chars.forEach(c => c.classList.add('on')); else type(); } }, { threshold: .6 }).observe(el);
+});
+
+/* ---------- galerias em faixas (abre no mouse / toque) ---------- */
+document.querySelectorAll('.acc').forEach(acc => {
+  const fs = [...acc.children];
+  const open = f => fs.forEach(x => x.classList.toggle('on', x === f));
+  fs.forEach(f => { f.addEventListener('mouseenter', () => open(f)); f.addEventListener('click', () => open(f)); });
+});
+
+/* ---------- etapas: aparecem uma a uma conforme o scroll ---------- */
+(function(){
+  const sec = document.getElementById('stepsSec'); if (!sec) return;
+  const items = [...document.querySelectorAll('#steps > div')];
+  const at = [0.08, 0.30, 0.52, 0.74];
+  function upd(){
+    const r = sec.getBoundingClientRect(), span = r.height - innerHeight;
+    const q = Math.min(1, Math.max(0, -r.top / span));
+    items.forEach((el, i) => el.classList.toggle('on', q >= at[i]));
+  }
+  addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+})();
+
+/* ---------- prédio 3D em traço de rascunho (three.js) ---------- */
+(function(){
+  const host = document.getElementById('bldg'); if (!host || !window.THREE) return;
+  const cv = host.querySelector('canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas:cv, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 3/4, 0.1, 200);
+  const rootG = new THREE.Group(); scene.add(rootG);
+
+  // traço de rascunho: cada aresta é desenhada duas vezes, levemente deslocada e com excesso nas pontas
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const segs = [];
+  const line = (a, b, j = 0.035) => {
+    const d = new THREE.Vector3().subVectors(b, a), len = d.length() || 1, u = d.clone().divideScalar(len);
+    for (let k = 0; k < 2; k++) {
+      const o = () => (rnd() - 0.5) * j, ex = (rnd() * 0.5) * j * 3;
+      const A = a.clone().addScaledVector(u, -ex).add(new THREE.Vector3(o(), o(), o()));
+      const B = b.clone().addScaledVector(u, ex).add(new THREE.Vector3(o(), o(), o()));
+      segs.push(A.x, A.y, A.z, B.x, B.y, B.z);
+    }
+  };
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const box = (cx, cy, cz, w, h, d, j) => {
+    const x0 = cx - w/2, x1 = cx + w/2, y0 = cy - h/2, y1 = cy + h/2, z0 = cz - d/2, z1 = cz + d/2;
+    const c = [V(x0,y0,z0),V(x1,y0,z0),V(x1,y0,z1),V(x0,y0,z1),V(x0,y1,z0),V(x1,y1,z0),V(x1,y1,z1),V(x0,y1,z1)];
+    [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(e => line(c[e[0]], c[e[1]], j));
+  };
+
+  // — pódio —
+  box(0, 0.55, 0, 8.6, 1.1, 5.8, 0.05);
+  for (let i = -3; i <= 3; i++) line(V(i * 1.15, 0, 2.9), V(i * 1.15, 1.1, 2.9), 0.03);
+  // — torre —
+  const FL = 24, FH = 0.55, W = 5.2, D = 3.6, Y0 = 1.1;
+  for (let f = 0; f < FL; f++) {
+    const top = f >= FL - 4, w = top ? W * 0.82 : W, d = top ? D * 0.82 : D, y = Y0 + f * FH;
+    box(0, y, 0, w + 0.18, 0.07, d + 0.18, 0.025);               // laje
+    if (!top && f % 2 === 0) {                                    // varanda alternada
+      box(-w * 0.18, y + 0.02, d / 2 + 0.32, w * 0.5, 0.05, 0.64, 0.02);
+      line(V(-w * 0.43, y + 0.03, d / 2 + 0.64), V(-w * 0.43, y + 0.3, d / 2 + 0.64), 0.015);
+      line(V(w * 0.07, y + 0.03, d / 2 + 0.64), V(w * 0.07, y + 0.3, d / 2 + 0.64), 0.015);
+      line(V(-w * 0.43, y + 0.3, d / 2 + 0.64), V(w * 0.07, y + 0.3, d / 2 + 0.64), 0.015);
+    }
+    for (let m = -2; m <= 2; m++) {                                // montantes das fachadas
+      line(V(m * w / 4.4, y + 0.04, d / 2), V(m * w / 4.4, y + FH - 0.04, d / 2), 0.012);
+      line(V(m * w / 4.4, y + 0.04, -d / 2), V(m * w / 4.4, y + FH - 0.04, -d / 2), 0.012);
+    }
+  }
+  const Ht = Y0 + FL * FH;
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(c => line(V(c[0] * (W + 0.18) / 2, Y0, c[1] * (D + 0.18) / 2), V(c[0] * (W + 0.18) / 2, Y0 + (FL - 4) * FH, c[1] * (D + 0.18) / 2), 0.02));
+  box(0.9, Ht + 0.3, 0.4, 1.4, 0.6, 1.1, 0.03);                    // casa de máquinas
+  // — guindaste —
+  const cx = -1.7, cz = -0.7, mh = 3.6;
+  [[-0.18,-0.18],[0.18,-0.18],[0.18,0.18],[-0.18,0.18]].forEach(c => line(V(cx + c[0], Ht, cz + c[1]), V(cx + c[0], Ht + mh, cz + c[1]), 0.015));
+  for (let i = 0; i < 12; i++) { const y = Ht + i * (mh / 12), y2 = y + mh / 12; line(V(cx - 0.18, y, cz + 0.18), V(cx + 0.18, y2, cz + 0.18), 0.012); line(V(cx + 0.18, y, cz - 0.18), V(cx - 0.18, y2, cz - 0.18), 0.012); }
+  const jy = Ht + mh;
+  line(V(cx - 1.9, jy, cz), V(cx + 5.2, jy, cz), 0.02); line(V(cx - 1.9, jy + 0.22, cz), V(cx + 5.2, jy + 0.22, cz), 0.02);
+  for (let i = 0; i < 18; i++) { const x = cx - 1.9 + i * 0.4; line(V(x, jy, cz), V(x + 0.2, jy + 0.22, cz), 0.012); line(V(x + 0.2, jy + 0.22, cz), V(x + 0.4, jy, cz), 0.012); }
+  line(V(cx, jy + 0.9, cz), V(cx + 5.2, jy + 0.22, cz), 0.02); line(V(cx, jy + 0.9, cz), V(cx - 1.9, jy + 0.22, cz), 0.02);
+  line(V(cx, jy, cz), V(cx, jy + 0.9, cz), 0.015);
+  box(cx - 1.5, jy - 0.15, cz, 0.5, 0.3, 0.3, 0.02);               // contrapeso
+  line(V(cx + 4.4, jy, cz), V(cx + 4.4, jy - 2.4, cz), 0.01); box(cx + 4.4, jy - 2.5, cz, 0.18, 0.18, 0.18, 0.01);
+  const nSeg = segs.length / 6;
+
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(segs, 3));
+  const mat = new THREE.LineBasicMaterial({ color:0xffffff, transparent:true, opacity:0.9 });
+  const lines = new THREE.LineSegments(geo, mat); lines.position.y = -(Ht + mh) / 2; rootG.add(lines);
+  // chão: anéis finos
+  const gm = new THREE.LineBasicMaterial({ color:0xffffff, transparent:true, opacity:0.18 });
+  for (const r of [6, 8, 10]) { const pts = []; for (let i = 0; i <= 96; i++) { const a = i / 96 * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)); } const g = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm); g.position.y = lines.position.y; rootG.add(g); }
+
+  function size() { const r = host.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
+  size(); new ResizeObserver(size).observe(host);
+  camera.position.set(0, 2, 46); camera.lookAt(0, -0.2, 0);
+
+  let yaw = 0.6, vel = 0, drag = false, lastX = 0, idleAt = 0, visible = false, t0 = null, tilt = 0.12;
+  host.addEventListener('pointerdown', e => { drag = true; lastX = e.clientX; vel = 0; host.setPointerCapture(e.pointerId); });
+  host.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - lastX; lastX = e.clientX; yaw += dx * 0.012; vel = dx * 0.012; });
+  const end = () => { drag = false; idleAt = performance.now(); };
+  host.addEventListener('pointerup', end); host.addEventListener('pointercancel', end);
+  new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; if (visible && t0 === null) t0 = performance.now(); }, { threshold: .15 }).observe(host);
+
+  let prev = performance.now();
+  (function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    if (!visible) return;
+    if (!drag) { yaw += vel; vel *= 0.94; if (Math.abs(vel) < 0.0005 && now - idleAt > 1200) yaw += dt * 0.25; }
+    rootG.rotation.y = yaw; rootG.rotation.x = tilt;
+    // o prédio vai sendo "desenhado" de baixo para cima
+    const p = Math.min(1, (now - t0) / 3200), e = 1 - Math.pow(1 - p, 3);
+    geo.setDrawRange(0, Math.floor(nSeg * 2 * e));
+    renderer.render(scene, camera);
+  })(performance.now());
+})();
+
+/* ---------- carrossel 3D de projetos, passa sozinho ---------- */
+(function(){
+  const root = document.getElementById('cf'); if (!root) return;
+  const cards = [...root.querySelectorAll('.cf-card')], N = cards.length;
+  const dotsBox = root.querySelector('.cf-dots'), capB = root.querySelector('.cf-cap b'), capS = root.querySelector('.cf-cap span');
+  const dots = cards.map((c, i) => { const b = document.createElement('button'); b.setAttribute('aria-label', 'Projeto ' + (i + 1)); b.addEventListener('click', () => { go(i); restart(); }); dotsBox.appendChild(b); return b; });
+  let cur = 0, timer = null;
+  function layout(){
+    const w = cards[0].offsetWidth;
+    cards.forEach((c, i) => {
+      let o = i - cur; o = ((o + N + N / 2) % N) - N / 2;          // distância circular até o ativo
+      const a = Math.abs(o), vis = a <= 1;
+      const x = o * w * 0.96, ry = Math.max(-40, Math.min(40, -o * 30)), z = a === 0 ? 0 : -90 - (a - 1) * 60;
+      c.style.transform = `translate(-50%,-50%) translate3d(${x}px,0,${z}px) rotateY(${ry}deg)`;
+      c.style.opacity = vis ? (a === 0 ? 1 : 0.92) : 0;
+      c.style.pointerEvents = vis ? 'auto' : 'none';
+      c.style.zIndex = 10 - Math.round(a);
+    });
+    dots.forEach((d, i) => d.classList.toggle('on', i === cur));
+    capB.textContent = cards[cur].dataset.name; capS.textContent = cards[cur].dataset.year;
+  }
+  function go(i){ cur = (i + N) % N; layout(); }
+  cards.forEach((c, i) => c.addEventListener('click', () => { if (i !== cur) { go(i); restart(); } }));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function restart(){ clearInterval(timer); if (!reduced) timer = setInterval(() => go(cur + 1), 3200); }
+  root.addEventListener('mouseenter', () => clearInterval(timer)); root.addEventListener('mouseleave', restart);
+  addEventListener('resize', layout);
+  layout(); restart();
+})();
+</script>
+</body>
+</html>
