@@ -157,6 +157,20 @@
   .feature .soon .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:currentColor; margin-right:10px; vertical-align:middle; animation:blink 1.4s steps(1) infinite; }
   .feature .soon { margin-top:30px; padding:14px 16px; border:1px solid currentColor; border-radius:999px; display:inline-block; }
   /* galeria em faixas: preto e branco, abre colorida no mouse */
+  /* carrossel liquid glass (WebGL) */
+  .lgc { position:relative; height:clamp(500px,54vw,820px); background:#fff; border-radius:10px; overflow:hidden; cursor:grab; touch-action:pan-y; user-select:none; }
+  .lgc:active { cursor:grabbing; }
+  .lgc canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .lgc-title { position:absolute; top:clamp(14px,2vw,28px); left:0; right:0; text-align:center; font-size:clamp(18px,1.7vw,28px); letter-spacing:-.04em; pointer-events:none; }
+  .lgc-cap { position:absolute; bottom:clamp(12px,1.8vw,26px); left:0; right:0; text-align:center; font-size:clamp(12px,.95vw,15px); pointer-events:none; }
+  .lgc-cap b { font-weight:500; margin-right:.6em; } .lgc-cap span { opacity:.6; }
+  .lgc-title, .lgc-cap { transition:opacity .35s; }
+  .lgc.zoomed .lgc-title, .lgc.zoomed .lgc-cap, .lgc.zoomed .lgc-hint { opacity:0; }
+  .lgc-hint { position:absolute; left:clamp(14px,2vw,28px); bottom:clamp(12px,1.8vw,26px); font-size:12px; opacity:.45; pointer-events:none; }
+  .lgc-arrow { position:absolute; top:50%; transform:translateY(-50%); z-index:5; width:clamp(40px,3.4vw,54px); height:clamp(40px,3.4vw,54px); border-radius:50%; border:1px solid #000; background:#fff; color:#000; font-size:20px; line-height:1; cursor:pointer; display:grid; place-items:center; transition:background .25s,color .25s; }
+  .lgc-arrow:hover { background:#000; color:#fff; }
+  .lgc-arrow.prev { left:clamp(8px,1.6vw,26px); } .lgc-arrow.next { right:clamp(8px,1.6vw,26px); }
+  @media (hover:none) { .lgc-hint { display:none; } }
   .acc { display:flex; gap:8px; height:clamp(460px,52vw,760px); }
   .acc figure { position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:12px; background:#111; cursor:pointer; transition:flex .75s cubic-bezier(.2,.7,.1,1); }
   .acc figure.on { flex:7 1 0; }
@@ -1099,6 +1113,107 @@ document.querySelectorAll('.acc').forEach(acc => {
   function restart(){ clearInterval(timer); timer = setInterval(() => go(cur + 1), 3000); }
   addEventListener('resize', layout);
   layout(); restart();
+})();
+
+/* ---------- carrossel liquid glass (three.js): lente de vidro, snap, zoom ao clicar ---------- */
+(function(){
+  if (!window.THREE) return;
+  const mod = (a, n) => ((a % n) + n) % n;
+  document.querySelectorAll('.acc').forEach(host => {
+    const figs = [...host.children];
+    const items = figs.map(f => ({ src: f.querySelector('img').getAttribute('src'), title: f.querySelector('b').textContent, desc: f.querySelector('figcaption span').textContent }));
+    const N = items.length; if (N < 3) return;
+    host.className = 'lgc rv' + (host.classList.contains('in') ? ' in' : '');
+    host.innerHTML = '<canvas></canvas><div class="lgc-title"></div><button class="lgc-arrow prev" type="button" aria-label="Anterior">←</button><button class="lgc-arrow next" type="button" aria-label="Próximo">→</button><p class="lgc-cap"><b></b><span></span></p><div class="lgc-hint">Arraste · clique na foto para ampliar</div>';
+    const cv = host.querySelector('canvas'), tEl = host.querySelector('.lgc-title'), cB = host.querySelector('.lgc-cap b'), cS = host.querySelector('.lgc-cap span');
+    const R = new THREE.WebGLRenderer({ canvas: cv, antialias: true }); R.setClearColor(0xffffff, 1);
+    const scene = new THREE.Scene(), cam = new THREE.OrthographicCamera(0, 1, 1, 0, -10, 10);
+    const geo = new THREE.PlaneGeometry(1, 1);
+    const cardVS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+    const cardFS = 'uniform sampler2D map; uniform vec2 uCover; uniform vec2 uSize; uniform float uAlpha; varying vec2 vUv; void main(){ vec2 uv = (vUv - .5) * uCover + .5; vec3 c = texture2D(map, uv).rgb; vec2 p = (vUv - .5) * uSize; vec2 b = uSize * .5 - 14.; vec2 q = abs(p) - b; float sd = length(max(q, 0.)) + min(max(q.x, q.y), 0.) - 14.; float a = 1. - smoothstep(-1., 1., sd); gl_FragColor = vec4(mix(vec3(1.), c, uAlpha), a); }';
+    const loader = new THREE.TextureLoader(), maxAni = R.capabilities.getMaxAnisotropy();
+    const meshes = items.map((it, i) => {
+      const m = new THREE.Mesh(geo, new THREE.ShaderMaterial({ transparent: true, uniforms: { map: { value: null }, uCover: { value: new THREE.Vector2(1, 1) }, uSize: { value: new THREE.Vector2(1, 1) }, uAlpha: { value: 1 } }, vertexShader: cardVS, fragmentShader: cardFS }));
+      m.visible = false; scene.add(m);
+      loader.load(it.src, tex => { tex.anisotropy = maxAni; tex.minFilter = THREE.LinearMipmapLinearFilter; m.material.uniforms.map.value = tex; m.userData.ia = tex.image.width / tex.image.height; fit(m); m.visible = true; });
+      return m;
+    });
+    const rt = new THREE.WebGLRenderTarget(1, 1, { samples: 4 });
+    const postScene = new THREE.Scene(), postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+      uniforms: { tex: { value: rt.texture }, uRes: { value: new THREE.Vector2(1, 1) }, uC: { value: new THREE.Vector2(0, 0) }, uR: { value: 0 }, uStretch: { value: 1 }, uAng: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
+      fragmentShader: 'uniform sampler2D tex; uniform vec2 uRes; uniform vec2 uC; uniform float uR; uniform float uStretch; uniform float uAng; varying vec2 vUv; void main(){ vec3 base = texture2D(tex, vUv).rgb; vec3 col = base; if (uR > 1.) { vec2 d = vUv * uRes - uC; float c = cos(uAng), s = sin(uAng); vec2 q = vec2(c * d.x + s * d.y, -s * d.x + c * d.y); q.x /= uStretch; float r = length(q) / uR; if (r < 1.) { float k = 1. - r * r; vec2 off = -d * .34 * k / uRes; vec3 lens = vec3(texture2D(tex, vUv + off).r, texture2D(tex, vUv + off * 1.08).g, texture2D(tex, vUv + off * 1.18).b); float rim = smoothstep(.7, 1., r); lens += vec3(.04, .14, .95) * rim * .6; lens = mix(lens, vec3(1.), pow(r, 14.) * .4); col = mix(lens, base, smoothstep(.975, 1., r)); } } gl_FragColor = vec4(col, 1.); }' }));
+    postScene.add(post);
+
+    let W = 1, H = 1, dpr = 1, cw = 100, ch = 100, gap = 20, step = 120, L = 600;
+    const fit = m => { const ia = m.userData.ia || 1, ca = cw / ch; m.material.uniforms.uCover.value.set(ia > ca ? ca / ia : 1, ia > ca ? 1 : ia / ca); };
+    function layout(){
+      const r = host.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height); dpr = Math.min(devicePixelRatio || 1, 2);
+      R.setPixelRatio(dpr); R.setSize(W, H, false); rt.setSize(W * dpr, H * dpr);
+      cam.right = W; cam.top = H; cam.updateProjectionMatrix();
+      ch = H * 0.64; cw = ch * 0.74; gap = Math.max(12, W * 0.016); step = cw + gap; L = N * step;
+      post.material.uniforms.uRes.value.set(W, H); meshes.forEach(fit);
+    }
+    new ResizeObserver(layout).observe(host); layout();
+
+    let pos = 0, target = 0, focus = 0, focusOn = false, down = false, moved = 0, sx = 0, sy = 0, st = 0, lastX = 0, lastT = 0, vel = 0, snapT = 0, visible = false, idxShown = -1;
+    const ptr = { x: 0, y: 0, in: false }, lens = { x: 0, y: 0, r: 0, ang: 0, stretch: 1 };
+    const snap = () => { target = Math.round(target / step) * step; };
+    const go = d => { focusOn = false; target = (Math.round(target / step) + d) * step; };
+    host.querySelector('.prev').addEventListener('click', () => go(-1));
+    host.querySelector('.next').addEventListener('click', () => go(1));
+    const local = e => { const b = host.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+    host.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; down = true; moved = 0; const p = local(e); sx = lastX = p[0]; sy = p[1]; st = lastT = performance.now(); vel = 0; host.setPointerCapture(e.pointerId); });
+    host.addEventListener('pointermove', e => {
+      const p = local(e); ptr.x = p[0]; ptr.y = H - p[1]; ptr.in = true;
+      if (!down) return;
+      const dx = p[0] - lastX, now = performance.now(); moved += Math.abs(dx); lastX = p[0];
+      if (moved > 6) { focusOn = false; target -= dx; pos -= dx * .6; const dt = Math.max(1, now - lastT); vel = dx / dt; lastT = now; }
+    });
+    host.addEventListener('pointerleave', () => { ptr.in = false; });
+    host.addEventListener('pointerenter', () => { ptr.in = true; });
+    const end = e => {
+      if (!down) return; down = false;
+      if (moved > 6) { target -= vel * 180; snap(); return; }
+      // clique: acha a foto sob o cursor
+      const p = local(e), cx = W / 2, cyy = H / 2, act = mod(Math.round(target / step), N);
+      let hit = -1;
+      for (let i = 0; i < N; i++) { const x = cx + mod(i * step - pos + L / 2, L) - L / 2, sc = (i === act && focus > .5) ? zoom() : 1; if (Math.abs(p[0] - x) < cw * sc / 2 && Math.abs(p[1] - cyy) < ch * sc / 2) { hit = i; break; } }
+      if (hit < 0) { focusOn = false; return; }
+      if (hit === act) focusOn = !focusOn;
+      else { focusOn = false; let dlt = mod(hit - act + N / 2, N) - N / 2; target = (Math.round(target / step) + dlt) * step; }
+    };
+    host.addEventListener('pointerup', end); host.addEventListener('pointercancel', () => { down = false; });
+    host.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { e.preventDefault(); focusOn = false; target += e.deltaX; clearTimeout(snapT); snapT = setTimeout(snap, 140); } }, { passive: false });
+    new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; }, { rootMargin: '100px' }).observe(host);
+    const zoom = () => Math.min(H * .94 / ch, W * .92 / cw);
+    const ease = t => t * t * (3 - 2 * t);
+
+    let prev = performance.now();
+    (function loop(now){
+      requestAnimationFrame(loop);
+      if (!visible) return;
+      pos += (target - pos) * .12;
+      focus += ((focusOn ? 1 : 0) - focus) * .12; const fe = ease(Math.min(1, Math.max(0, focus)));
+      host.classList.toggle('zoomed', focus > .5);
+      const act = mod(Math.round(target / step), N);
+      if (act !== idxShown) { idxShown = act; tEl.textContent = items[act].title; cB.textContent = String(act + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0'); cS.textContent = items[act].desc; }
+      meshes.forEach((m, i) => {
+        const x = W / 2 + mod(i * step - pos + L / 2, L) - L / 2, isA = i === act, sc = isA ? 1 + (zoom() - 1) * fe : 1;
+        m.position.set(x, H / 2, isA ? 1 : 0); m.scale.set(cw * sc, ch * sc, 1);
+        m.material.uniforms.uSize.value.set(cw * sc, ch * sc);
+        m.material.uniforms.uAlpha.value = isA ? 1 : 1 - fe;
+      });
+      // lente: segue o cursor com atraso, alonga com a velocidade
+      const dx = ptr.x - lens.x, dy = ptr.y - lens.y; lens.x += dx * .2; lens.y += dy * .2;
+      const sp = Math.hypot(dx, dy) * .2; if (sp > .4) lens.ang = Math.atan2(dy, dx);
+      lens.stretch += ((1 + Math.min(.8, sp * .05)) - lens.stretch) * .2;
+      const r0 = Math.min(130, Math.max(70, H * .17)); lens.r += (((ptr.in || down) ? r0 : 0) - lens.r) * .16; if (lens.r < .5) lens.r = 0;
+      const u = post.material.uniforms; u.uC.value.set(lens.x, lens.y); u.uR.value = lens.r; u.uStretch.value = lens.stretch; u.uAng.value = lens.ang;
+      R.setRenderTarget(rt); R.render(scene, cam); R.setRenderTarget(null); R.render(postScene, postCam);
+    })(performance.now());
+  });
 })();
 </script>
 </body>
