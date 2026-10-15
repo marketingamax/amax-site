@@ -66,6 +66,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .scene .sc-l { left:auto; right:calc(50% + min(100vw,100vh) * 0.36 + clamp(16px,2.2vw,40px)); text-align:right; max-width:calc(50vw - min(100vw,100vh) * 0.36 - clamp(30px,4vw,70px)); }
   .scene .sc-r { right:auto; left:calc(50% + min(100vw,100vh) * 0.36 + clamp(16px,2.2vw,40px)); text-align:left; max-width:calc(50vw - min(100vw,100vh) * 0.36 - clamp(30px,4vw,70px)); }
   .scene .tag { top:auto; bottom:clamp(22px,4vh,48px); transform:none; }
+  .sc-cnt { margin-top:14px; } .sc-cnt b { display:block; font-weight:500; font-variant-numeric:tabular-nums; min-width:15ch; white-space:nowrap; } .sc-cnt span { opacity:.6; }
   .scene .tag { position:absolute; top:50%; font-size:clamp(11px,.9vw,15px); line-height:1.25; transform:translateY(-50%); }
   .scene .tag.l { left:var(--pad); }
   .scene .tag.r { right:var(--pad); text-align:right; }
@@ -430,7 +431,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
     <div class="scene" id="scene">
       <h2 class="sc-l">Sua empresa pode ter o melhor produto.</h2>
       <h2 class="sc-r">Mas se a marca não convencer, o VGV some.</h2>
-      <div class="tag l">Extensão estratégica<br>da incorporadora.</div>
+      <div class="tag l">Extensão estratégica<br>da incorporadora.<div class="sc-cnt"><b id="scount">+R$ 0</b><span>em VGV sob gestão de marketing</span></div></div>
       <div class="tag r">Florianópolis<br><span class="clock">—</span></div>
     </div>
     <div class="claim" id="claim">
@@ -446,11 +447,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 <main class="site" id="topo">
 
   <!-- TESE -->
-  <section class="sec light quote" id="sobre">
-    <p class="mid-t typed" id="typed" aria-label="Antes de falar com o corretor, o comprador já decidiu se o seu preço faz sentido. A identidade do empreendimento é o primeiro metro quadrado vendido.">Antes de falar com o corretor, o comprador já decidiu se o seu preço faz sentido. A identidade do empreendimento é o primeiro metro quadrado vendido.</p>
-  </section>
-
-  <section class="sec dark tese">
+  <section class="sec dark tese" id="sobre">
     <h2 class="big stmt rv">Extensão estratégica da incorporadora. Com um objetivo: <em class="serif">VGV.</em></h2>
     <div class="tese-text">
       <p class="rv">Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, plantas, renders, terreno e concorrência, e decidimos junto com você. A marca vem depois, como consequência da estratégia.</p>
@@ -781,7 +778,7 @@ const globe = (() => {
 const $ = id => document.getElementById(id);
 const track = $('track'), world = $('world'), fogworld = $('fogworld'), rush = $('rush'),
       blackout = $('blackout'), hint = $('hint');
-const stage = $('stage'), scene = $('scene'), guide = $('guide'), pline = $('pline'), skip = $('skip'); let guideTxt = '';
+const stage = $('stage'), scene = $('scene'), guide = $('guide'), pline = $('pline'), skip = $('skip'), scount = $('scount'); let guideTxt = '';
 const photo = $('photo'), claim = $('claim');
 
 // ponto do topo do prédio dentro da foto (fração da imagem original 910×1365)
@@ -839,6 +836,7 @@ function render() {
   const gp = range(p, 0.5, 1);
   scene.style.opacity = sv * (1 - range(p, 0.8, 0.9));
   globe.draw(gp, sv * (1 - range(p, 0.94, 1)), performance.now() / 1000);
+  scount.textContent = '+R$ ' + Math.round(1e9 * range(gp, 0.04, 0.8)).toLocaleString('pt-BR');
 
   const c = range(p, 0.02, 0.2);
   claim.style.opacity = 1 - c;
