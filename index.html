@@ -166,6 +166,20 @@
   .acc figcaption b { display:block; font-weight:500; font-size:clamp(16px,1.4vw,22px); letter-spacing:-.03em; margin-bottom:4px; }
   .acc figcaption span { display:block; font-size:clamp(12px,.95vw,15px); opacity:.85; max-width:42ch; }
   @media (max-width:820px){ .acc { height:420px; } .acc figure.on { flex:5 1 0; } }
+  .feature.fullw { grid-template-columns:1fr; gap:clamp(30px,4vw,60px); }
+  .feature.fullw .txt { position:static; display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,90px); align-items:start; }
+  .feature.fullw .txt dl { margin-top:0; }
+  /* antes e depois da marca */
+  .ba { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:clamp(20px,4vw,70px); align-items:center; background:#000; color:#fff; border-radius:8px; padding:clamp(28px,4vw,64px) clamp(24px,5vw,90px); }
+  .ba-t { font-size:clamp(26px,3.2vw,56px); line-height:1.02; letter-spacing:-.05em; }
+  .ba-item { display:flex; flex-direction:column; align-items:center; gap:clamp(14px,1.6vw,26px); }
+  .ba-item span { font-size:12px; letter-spacing:.12em; text-transform:uppercase; opacity:.55; }
+  .ba-item img { height:clamp(46px,5.4vw,96px); width:auto; max-width:100%; object-fit:contain; }
+  @media (max-width:820px){ .ba { grid-template-columns:1fr 1fr; } .ba-t { grid-column:1 / -1; } }
+  .acc.many { height:clamp(420px,42vw,740px); }
+  .acc.many figure.on { flex:9 1 0; }
+  .acc.many .lab { font-size:12px; }
+  @media (max-width:820px){ .feature.fullw .txt { grid-template-columns:1fr; } .acc.many { height:460px; } }
   .gal { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
   .gal figure { overflow:hidden; border-radius:2px; background:#ddd; }
   .gal .a { grid-column:span 6; aspect-ratio:16/9; }
@@ -392,25 +406,39 @@
       <p class="mid-t rv">Trabalho que começou com a tabela e terminou em <em class="serif">VGV.</em></p>
     </div>
 
-    <article class="feature">
+    <article class="feature fullw">
       <div class="txt rv">
-        <div class="lbl">Case 01 · Verso</div>
-        <h3>De Semaco a Verso.</h3>
-        <p class="small" style="max-width:44ch">Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.</p>
-        <dl class="small">
-          <dt>Antes</dt><dd>Semaco</dd>
-          <dt>Depois</dt><dd>Verso Empreendimentos</dd>
-          <dt>O que fizemos</dt><dd>Naming · identidade visual · brandbook · campanha de lançamento · materiais e aplicações</dd>
-        </dl>
-        <div class="soon small"><i class="dot"></i>Em breve: um novo conceito único, nunca visto em Floripa.</div>
+        <div class="l">
+          <div class="lbl">Case 01 · Verso</div>
+          <h3>De Semaco a Verso.</h3>
+          <p class="small" style="max-width:44ch">Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.</p>
+        </div>
+        <div class="r">
+          <dl class="small">
+            <dt>O que fizemos</dt><dd>Naming · identidade visual · brandbook · campanha de lançamento · materiais e aplicações</dd>
+          </dl>
+          <div class="soon small"><i class="dot"></i>Em breve: um novo conceito único, nunca visto em Floripa.</div>
+        </div>
       </div>
-      <div class="acc rv">
-        <figure class="on"><img src="img/verso-render.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do empreendimento Verso.</span></figcaption></figure>
-        <figure class=""><img src="img/verso-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>"A ilha tem dois lados." Campanha de lançamento.</span></figcaption></figure>
-        <figure class=""><img src="img/verso-revista.jpg" alt="Revista de lançamento" loading="lazy"><span class="lab">Revista</span><figcaption><b>Revista de lançamento</b><span>Material impresso do empreendimento.</span></figcaption></figure>
-        <figure class=""><img src="img/verso-caixa.jpg" alt="Kit de lançamento" loading="lazy"><span class="lab">Kit</span><figcaption><b>Kit de lançamento</b><span>"O outro lado da ilha." Caixa para corretores e clientes.</span></figcaption></figure>
-        <figure class=""><img src="img/verso-guindaste.jpg" alt="Canteiro" loading="lazy"><span class="lab">Canteiro</span><figcaption><b>Canteiro</b><span>A marca presente na obra.</span></figcaption></figure>
-        <figure class=""><img src="img/verso-monolito.jpg" alt="Totem de entrada" loading="lazy"><span class="lab">Totem</span><figcaption><b>Totem de entrada</b><span>Identidade aplicada no espaço.</span></figcaption></figure>
+      <div class="ba rv">
+        <p class="ba-t">Rebranding<br>+ Naming</p>
+        <div class="ba-item"><span>Antes</span><img src="img/semaco-logo.png" alt="Semaco"></div>
+        <div class="ba-item"><span>Depois</span><img src="img/verso-logo-w.png" alt="Verso Empreendimentos"></div>
+      </div>
+      <div class="acc many rv">
+        <figure class="on"><img src="img/v-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O Rio Tavares ganha um novo Verso.</span></figcaption></figure>
+        <figure class=""><img src="img/v-livro.jpg" alt="Livro de lançamento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro de lançamento</b><span>Estojo e livro da marca.</span></figcaption></figure>
+        <figure class=""><img src="img/v-onibus.jpg" alt="Mídia em ônibus" loading="lazy"><span class="lab">Ônibus</span><figcaption><b>Mídia em ônibus</b><span>Em breve, no Rio Tavares.</span></figcaption></figure>
+        <figure class=""><img src="img/v-revistas.jpg" alt="Revista de lançamento" loading="lazy"><span class="lab">Revistas</span><figcaption><b>Revista de lançamento</b><span>Páginas e aberturas da campanha.</span></figcaption></figure>
+        <figure class=""><img src="img/v-guindaste.jpg" alt="Canteiro" loading="lazy"><span class="lab">Canteiro</span><figcaption><b>Canteiro</b><span>A marca presente na obra.</span></figcaption></figure>
+        <figure class=""><img src="img/v-praia.jpg" alt="Outdoor" loading="lazy"><span class="lab">Praia</span><figcaption><b>Outdoor</b><span>Novos caminhos começam aqui.</span></figcaption></figure>
+        <figure class=""><img src="img/v-capacete.jpg" alt="Equipamentos de obra" loading="lazy"><span class="lab">Obra</span><figcaption><b>Equipamentos de obra</b><span>Identidade aplicada no capacete.</span></figcaption></figure>
+        <figure class=""><img src="img/v-kit.jpg" alt="Kit de lançamento" loading="lazy"><span class="lab">Kit</span><figcaption><b>Kit de lançamento</b><span>Caixa de presente da marca.</span></figcaption></figure>
+        <figure class=""><img src="img/v-envelope.jpg" alt="Papelaria" loading="lazy"><span class="lab">Papelaria</span><figcaption><b>Papelaria</b><span>Envelope com a marca e o símbolo.</span></figcaption></figure>
+        <figure class=""><img src="img/v-sinalizacao.jpg" alt="Sinalização" loading="lazy"><span class="lab">Sinalização</span><figcaption><b>Sinalização</b><span>Identidade aplicada nos espaços do empreendimento.</span></figcaption></figure>
+        <figure class=""><img src="img/v-vinho.jpg" alt="Kit de vinho" loading="lazy"><span class="lab">Vinho</span><figcaption><b>Kit de vinho</b><span>Presente com a marca Verso.</span></figcaption></figure>
+        <figure class=""><img src="img/v-cartoes.jpg" alt="Cartões de visita" loading="lazy"><span class="lab">Cartões</span><figcaption><b>Cartões de visita</b><span>Papelaria da marca.</span></figcaption></figure>
+        <figure class=""><img src="img/v-topo.jpg" alt="Outdoor em topo de prédio" loading="lazy"><span class="lab">Topo</span><figcaption><b>Outdoor em topo de prédio</b><span>Campanha em mídia exterior.</span></figcaption></figure>
       </div>
     </article>
 
