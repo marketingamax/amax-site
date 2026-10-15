@@ -154,11 +154,11 @@
   .feature .soon { margin-top:30px; padding:14px 16px; border:1px solid currentColor; border-radius:999px; display:inline-block; }
   /* galeria em faixas: preto e branco, abre colorida no mouse */
   .acc { display:flex; gap:8px; height:clamp(460px,52vw,760px); }
-  .acc figure { position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:8px; background:#111; cursor:pointer; transition:flex .75s cubic-bezier(.2,.7,.1,1); }
+  .acc figure { position:relative; flex:1 1 0; min-width:0; overflow:hidden; border-radius:12px; background:#111; cursor:pointer; transition:flex .75s cubic-bezier(.2,.7,.1,1); }
   .acc figure.on { flex:7 1 0; }
-  .acc img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) brightness(.78) contrast(1.05); transform:scale(1.06); transition:filter .7s ease, transform 1s cubic-bezier(.2,.7,.1,1); }
-  .acc figure.on img { filter:none; transform:scale(1); }
-  .acc .lab { position:absolute; top:16px; left:50%; transform:translateX(-50%); writing-mode:vertical-rl; color:#fff; font-size:13px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; opacity:.85; transition:opacity .35s; }
+  .acc img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:none; transform:scale(1); transition:transform 1s cubic-bezier(.2,.7,.1,1); }
+  .acc figure.on img { transform:scale(1.02); }
+  .acc .lab { display:none; position:absolute; top:16px; left:50%; transform:translateX(-50%); writing-mode:vertical-rl; color:#fff; font-size:13px; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; opacity:.85; transition:opacity .35s; }
   .acc figure.on .lab { opacity:0; }
   .acc figure::after { content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.65), transparent 45%); opacity:0; transition:opacity .6s; pointer-events:none; }
   .acc figure.on::after { opacity:1; }
@@ -423,7 +423,7 @@
         <div class="soon small"><i class="dot"></i>Em breve: um novo conceito único, nunca visto em Floripa.</div>
       </div>
       <div class="acc many rv">
-        <figure class="on"><img src="img/v-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O Rio Tavares ganha um novo Verso.</span></figcaption></figure>
+        <figure class=""><img src="img/v-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O Rio Tavares ganha um novo Verso.</span></figcaption></figure>
         <figure class=""><img src="img/v-livro.jpg" alt="Livro de lançamento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro de lançamento</b><span>Estojo e livro da marca.</span></figcaption></figure>
         <figure class=""><img src="img/v-onibus.jpg" alt="Mídia em ônibus" loading="lazy"><span class="lab">Ônibus</span><figcaption><b>Mídia em ônibus</b><span>Em breve, no Rio Tavares.</span></figcaption></figure>
         <figure class=""><img src="img/v-revistas.jpg" alt="Revista de lançamento" loading="lazy"><span class="lab">Revistas</span><figcaption><b>Revista de lançamento</b><span>Páginas e aberturas da campanha.</span></figcaption></figure>
@@ -451,7 +451,7 @@
         </dl>
       </div>
       <div class="acc many rv">
-        <figure class="on"><img src="img/a-fachada.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do ARKKI.</span></figcaption></figure>
+        <figure class=""><img src="img/a-fachada.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do ARKKI.</span></figcaption></figure>
         <figure class=""><img src="img/a-banner.jpg" alt="Banner em shopping" loading="lazy"><span class="lab">Shopping</span><figcaption><b>Banner em shopping</b><span>Mais tempo juntos, mais vida no seu dia.</span></figcaption></figure>
         <figure class=""><img src="img/a-livro.jpg" alt="Livro do empreendimento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro do empreendimento</b><span>Material de apresentação comercial.</span></figcaption></figure>
         <figure class=""><img src="img/a-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O centro mudou.</span></figcaption></figure>
@@ -950,6 +950,7 @@ document.querySelectorAll('.acc').forEach(acc => {
   const fs = [...acc.children];
   const open = f => fs.forEach(x => x.classList.toggle('on', x === f));
   fs.forEach(f => { f.addEventListener('mouseenter', () => open(f)); f.addEventListener('click', () => open(f)); });
+  acc.addEventListener('mouseleave', () => fs.forEach(x => x.classList.remove('on')));
 });
 
 /* ---------- etapas: aparecem uma a uma conforme o scroll ---------- */
