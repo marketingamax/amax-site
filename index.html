@@ -123,9 +123,9 @@
   .typed .ch.last::after { content:""; display:inline-block; width:.06em; height:.9em; margin-left:.05em; background:currentColor; vertical-align:-.08em; animation:blink 1s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
   /* tese */
-  .tese .stmt { text-indent:22vw; }
-  .tese .cols { display:grid; grid-template-columns:1fr 1fr; gap:var(--pad); margin-top:clamp(60px,9vw,160px); }
-  .tese .cols p { max-width:36ch; }
+  .tese .stmt { text-indent:0; text-align:center; max-width:17em; margin:0 auto; }
+  .tese .cols { display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,90px); max-width:980px; margin:clamp(60px,9vw,150px) auto 0; text-align:center; }
+  .tese .cols p { max-width:36ch; margin:0 auto; }
 
   /* rastro de imagens no mouse */
   .trail-area { position:relative; height:clamp(380px,78vh,820px); margin:clamp(40px,6vw,100px) calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); overflow:hidden; cursor:none; touch-action:pan-y; }
