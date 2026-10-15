@@ -193,6 +193,11 @@
   .gal .e { grid-column:span 3; aspect-ratio:3/4; }
   /* carrossel 3D de projetos */
   .cf-wrap { background:#f2f1f0; margin:0 calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); padding:clamp(50px,7vw,110px) var(--pad); overflow:hidden; }
+  .cf-title { text-align:center; font-weight:400; font-size:clamp(34px,4.4vw,76px); letter-spacing:-.05em; line-height:1; margin:0 0 clamp(26px,3.4vw,56px); }
+  .cf { position:relative; }
+  .cf-arrow { position:absolute; top:calc(clamp(260px,31vw,480px) / 2); transform:translateY(-50%); z-index:30; width:clamp(42px,3.6vw,58px); height:clamp(42px,3.6vw,58px); border-radius:50%; border:1px solid #000; background:#f2f1f0; color:#000; font-size:clamp(18px,1.6vw,24px); line-height:1; cursor:pointer; display:grid; place-items:center; transition:background .25s,color .25s; }
+  .cf-arrow:hover { background:#000; color:#fff; }
+  .cf-arrow.prev { left:clamp(6px,1.5vw,28px); } .cf-arrow.next { right:clamp(6px,1.5vw,28px); }
   .cf-stage { position:relative; height:clamp(260px,31vw,480px); perspective:1500px; }
   .cf-card { position:absolute; left:50%; top:50%; width:clamp(230px,30vw,470px); aspect-ratio:5/4; margin:0; overflow:hidden; cursor:pointer; backface-visibility:hidden; background:#ddd; transition:transform .9s cubic-bezier(.2,.7,.1,1), opacity .7s ease; will-change:transform,opacity; }
   .cf-card img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -464,10 +469,12 @@
       </div>
     </article>
 
-    <div class="lbl" style="margin-bottom:18px">Mais cases</div>
     <div class="cf-wrap">
+      <h2 class="cf-title">Mais cases</h2>
       <div class="cf" id="cf" aria-roledescription="carrossel">
         <div class="cf-stage"><figure class="cf-card" data-name="Le Rêve" data-year="Em breve"><img src="img/c-le-reve.jpg" alt="Le Rêve" loading="lazy"></figure><figure class="cf-card" data-name="Nextto" data-year="2026"><img src="img/c-nextto.jpg" alt="Nextto" loading="lazy"></figure><figure class="cf-card" data-name="Liebe" data-year="2026"><img src="img/c-liebe.jpg" alt="Liebe" loading="lazy"></figure><figure class="cf-card" data-name="ARKKI" data-year="2025"><img src="img/c-arkki.jpg" alt="ARKKI" loading="lazy"></figure><figure class="cf-card" data-name="Verso Empreendimentos" data-year="2026"><img src="img/c-verso-emp.jpg" alt="Verso Empreendimentos" loading="lazy"></figure><figure class="cf-card" data-name="Ybirá" data-year="Em breve"><img src="img/c-ybira.jpg" alt="Ybirá" loading="lazy"></figure><figure class="cf-card" data-name="Verso Origem" data-year="Em breve"><img src="img/c-verso-origem.jpg" alt="Verso Origem" loading="lazy"></figure><figure class="cf-card" data-name="Casa Ruth" data-year="Em breve"><img src="img/c-casa-ruth.jpg" alt="Casa Ruth" loading="lazy"></figure></div>
+        <button class="cf-arrow prev" type="button" aria-label="Anterior">←</button>
+        <button class="cf-arrow next" type="button" aria-label="Próximo">→</button>
         <div class="cf-dots" role="tablist"></div>
         <p class="cf-cap"><b></b> <span></span></p>
       </div>
@@ -1086,6 +1093,8 @@ document.querySelectorAll('.acc').forEach(acc => {
   }
   function go(i){ cur = (i + N) % N; layout(); }
   cards.forEach((c, i) => c.addEventListener('click', () => { if (i !== cur) { go(i); restart(); } }));
+  root.querySelector('.cf-arrow.prev').addEventListener('click', () => { go(cur - 1); restart(); });
+  root.querySelector('.cf-arrow.next').addEventListener('click', () => { go(cur + 1); restart(); });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function restart(){ clearInterval(timer); timer = setInterval(() => go(cur + 1), 3000); }
   addEventListener('resize', layout);
