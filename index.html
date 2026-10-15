@@ -50,13 +50,17 @@
   .scene h2 { position:absolute; top:var(--pad); font-weight:400; font-size:clamp(15px,1.55vw,30px); line-height:1.1; max-width:42vw; }
   .scene .sc-l { left:var(--pad); }
   .scene .sc-r { right:var(--pad); text-align:right; }
+  .scene h2 { position:absolute; top:50%; transform:translateY(-50%); font-weight:400; font-size:clamp(18px,2.1vw,36px); line-height:1.08; letter-spacing:-.04em; }
+  .scene .sc-l { left:auto; right:calc(50% + min(100vw,100vh) * 0.36 + clamp(16px,2.2vw,40px)); text-align:right; max-width:calc(50vw - min(100vw,100vh) * 0.36 - clamp(30px,4vw,70px)); }
+  .scene .sc-r { right:auto; left:calc(50% + min(100vw,100vh) * 0.36 + clamp(16px,2.2vw,40px)); text-align:left; max-width:calc(50vw - min(100vw,100vh) * 0.36 - clamp(30px,4vw,70px)); }
+  .scene .tag { top:auto; bottom:clamp(22px,4vh,48px); transform:none; }
   .scene .tag { position:absolute; top:50%; font-size:clamp(11px,.9vw,15px); line-height:1.25; transform:translateY(-50%); }
   .scene .tag.l { left:var(--pad); }
   .scene .tag.r { right:var(--pad); text-align:right; }
   .sc-logo { position:absolute; left:var(--pad); right:var(--pad); bottom:0; z-index:2; transform:translateY(26%); overflow:hidden; }
   .sc-logo img { display:block; width:100%; height:auto; clip-path:inset(0 100% 0 0); will-change:clip-path; }
   .cards-logo { position:absolute; left:0; top:0; width:clamp(110px,10vw,220px); z-index:6; mix-blend-mode:difference; pointer-events:none; opacity:0; will-change:transform,opacity; }
-  @media (max-width:820px){ .scene h2 { max-width:46vw; font-size:14px; } .sc-logo { transform:translateY(18%); } }
+  @media (max-width:820px){ .scene h2, .scene .sc-l, .scene .sc-r { top:var(--pad); transform:none; max-width:46vw; font-size:14px; } .scene .sc-l { left:var(--pad); right:auto; text-align:left; } .scene .sc-r { left:auto; right:var(--pad); text-align:right; } .sc-logo { transform:translateY(18%); } }
   .blackout { position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; }
 
   .claim { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); z-index:5; font-size:clamp(13px,2vw,36px); will-change:opacity,transform; }
@@ -496,11 +500,7 @@
       <div class="stats rv" style="justify-content:center;text-align:center"><div><b><span class="ph">[X]</span></b><span class="small">lançamentos</span></div><div><b><span class="ph">[R$ X]</span></b><span class="small">de VGV lançado</span></div></div>
     </div>
   </section>
-  <div class="marq" style="background:#000;padding:0 0 8px">
-    <div class="t"><figure><img src="img/c-le-reve.jpg" alt=""></figure><figure><img src="img/c-nextto.jpg" alt=""></figure><figure><img src="img/c-liebe.jpg" alt=""></figure><figure><img src="img/c-arkki.jpg" alt=""></figure><figure><img src="img/c-verso-emp.jpg" alt=""></figure><figure><img src="img/c-ybira.jpg" alt=""></figure><figure><img src="img/c-verso-origem.jpg" alt=""></figure><figure><img src="img/c-casa-ruth.jpg" alt=""></figure></div>
-    <div class="t" aria-hidden="true"><figure><img src="img/c-le-reve.jpg" alt=""></figure><figure><img src="img/c-nextto.jpg" alt=""></figure><figure><img src="img/c-liebe.jpg" alt=""></figure><figure><img src="img/c-arkki.jpg" alt=""></figure><figure><img src="img/c-verso-emp.jpg" alt=""></figure><figure><img src="img/c-ybira.jpg" alt=""></figure><figure><img src="img/c-verso-origem.jpg" alt=""></figure><figure><img src="img/c-casa-ruth.jpg" alt=""></figure></div>
-  </div>
-  <div class="dark" style="padding:8px"><div style="border-radius:2px;overflow:hidden;aspect-ratio:21/6"><img src="img/evento-cena.jpg" alt="Evento Cena" loading="lazy"></div></div>
+
 
   <!-- PRODUTOS -->
   <section class="sec light" id="produtos">
@@ -945,7 +945,7 @@ document.querySelectorAll('.typed').forEach(function(el){
       if (i > 0) chars[i - 1].classList.remove('last');
       if (i >= chars.length) { chars[chars.length - 1].classList.add('last'); return; }
       chars[i].classList.add('on', 'last'); i++;
-      setTimeout(tick, /[.,]/.test(chars[i - 1].textContent) ? 260 : 28 + Math.random() * 26);
+      setTimeout(tick, /[.,]/.test(chars[i - 1].textContent) ? 130 : 13 + Math.random() * 12);
     };
     tick();
   }
