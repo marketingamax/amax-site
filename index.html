@@ -60,6 +60,9 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .bigcnt { position:absolute; left:50%; top:30%; transform:translate(-50%,-50%); text-align:center; color:#fff; text-shadow:0 0 40px #000, 0 0 90px #000; width:100%; padding:0 var(--pad); }
   .bigcnt b { display:block; font-weight:400; font-size:clamp(34px,8.2vw,170px); letter-spacing:-.05em; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .bigcnt span { display:block; margin-top:.9em; font-size:clamp(13px,1.2vw,20px); opacity:.8; letter-spacing:-.01em; }
+  .born { position:absolute; left:50%; bottom:clamp(54px,9.5vh,110px); transform:translateX(-50%); margin:0; color:#fff; text-align:left; font-size:clamp(18px,2vw,34px); line-height:1.06; letter-spacing:-.04em; white-space:nowrap; text-shadow:0 0 30px #000; }
+  .born span { display:block; } .born b { font-weight:700; letter-spacing:-.03em; } .born small { font-size:.4em; letter-spacing:-.01em; margin-left:.7em; opacity:.85; vertical-align:baseline; }
+  @media (max-width:820px){ .born { white-space:normal; width:80vw; text-align:center; } .born small { display:block; margin:.4em 0 0; } }
   .globe { position:absolute; inset:0; z-index:2; opacity:0; pointer-events:none; }
   .scene { position:absolute; inset:0; z-index:3; opacity:0; pointer-events:none; color:#fff; letter-spacing:-.03em; }
   .scene h2 { position:absolute; top:var(--pad); font-weight:400; font-size:clamp(15px,1.55vw,30px); line-height:1.1; max-width:42vw; }
@@ -451,6 +454,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 
     <canvas id="globe" class="globe" aria-hidden="true"></canvas>
     <div class="scene" id="scene">
+      <p class="born"><span class="l1">A <b>AMAX</b> nasceu dentro</span><span class="l2">de uma incorporadora <small>— não de uma agência de publicidade.</small></span></p>
       <div class="bigcnt"><b id="scount">+R$ 0</b><span>em VGV sob gestão de marketing</span></div>
     </div>
     <div class="claim" id="claim">
@@ -744,7 +748,7 @@ const globe = (() => {
   const inRing = (x, y, ring) => { let ins = false; for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins; } return ins; };
   const inPoly = (x, y, poly) => { if (!inRing(x, y, poly[0])) return false; for (let i = 1; i < poly.length; i++) if (inRing(x, y, poly[i])) return false; return true; };
   const inFeat = (x, y, f) => { const ge = f.geometry; if (ge.type === 'Polygon') return inPoly(x, y, ge.coordinates); if (ge.type === 'MultiPolygon') return ge.coordinates.some(p => inPoly(x, y, p)); return false; };
-  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; R = Math.min(W, H) * 0.36; proj.translate([W / 2, H / 2]); }
+  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; R = Math.min(W, H) * 0.33; proj.translate([W / 2, H * 0.45]); }
   size(); addEventListener('resize', size);
   fetch('vendor/ne_110m_land.json').then(r => r.json()).then(j => {
     land = j; const step = 1.25;
@@ -774,7 +778,7 @@ const globe = (() => {
     const sf = sc / R;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, W, H);
-    g.beginPath(); g.arc(W / 2, H / 2, sc, 0, 6.2832); g.fillStyle = '#000'; g.fill();
+    g.beginPath(); g.arc(W / 2, H * 0.45, sc, 0, 6.2832); g.fillStyle = '#000'; g.fill();
     g.strokeStyle = '#fff'; g.lineWidth = Math.min(2 * sf, 6); g.stroke();
     g.beginPath(); path(grat); g.strokeStyle = '#fff'; g.lineWidth = Math.min(sf, 3); g.globalAlpha = 0.22 * (1 - ck(z * 1.4)); g.stroke(); g.globalAlpha = 1;
     g.beginPath(); land.features.forEach(f => path(f)); g.strokeStyle = '#fff'; g.lineWidth = Math.min(sf, 3); g.stroke();
