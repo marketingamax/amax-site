@@ -57,6 +57,9 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .card img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   @media (max-width:820px){ .card { height:min(34vh,56vw); } }
   /* cena do header: textos, tags, cartas no cursor e logo cortado embaixo */
+  .bigcnt { position:absolute; left:50%; top:30%; transform:translate(-50%,-50%); text-align:center; color:#fff; text-shadow:0 0 40px #000, 0 0 90px #000; width:100%; padding:0 var(--pad); }
+  .bigcnt b { display:block; font-weight:400; font-size:clamp(34px,8.2vw,170px); letter-spacing:-.05em; line-height:1; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .bigcnt span { display:block; margin-top:.9em; font-size:clamp(13px,1.2vw,20px); opacity:.8; letter-spacing:-.01em; }
   .globe { position:absolute; inset:0; z-index:2; opacity:0; pointer-events:none; }
   .scene { position:absolute; inset:0; z-index:3; opacity:0; pointer-events:none; color:#fff; letter-spacing:-.03em; }
   .scene h2 { position:absolute; top:var(--pad); font-weight:400; font-size:clamp(15px,1.55vw,30px); line-height:1.1; max-width:42vw; }
@@ -445,10 +448,7 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 
     <canvas id="globe" class="globe" aria-hidden="true"></canvas>
     <div class="scene" id="scene">
-      <h2 class="sc-l">Sua empresa pode ter o melhor produto.</h2>
-      <h2 class="sc-r">Mas se a marca não convencer, o VGV some.</h2>
-      <div class="tag l">Extensão estratégica<br>da incorporadora.<div class="sc-cnt"><b id="scount">+R$ 0</b><span>em VGV sob gestão de marketing</span></div></div>
-      <div class="tag r">Florianópolis<br><span class="clock">—</span></div>
+      <div class="bigcnt"><b id="scount">+R$ 0</b><span>em VGV sob gestão de marketing</span></div>
     </div>
     <div class="claim" id="claim">
       <h1 class="claim-text"><span class="ct"><span>Visão de Incorporadora,</span><span>não de Agência.</span></span></h1>
@@ -865,9 +865,9 @@ function render() {
   // 4) globo: gira até o sul do Brasil, pin em Florianópolis, zoom e "entra" na cidade
   const sv = range(p, 0.44, 0.54);
   const gp = range(p, 0.5, 1);
-  scene.style.opacity = sv * (1 - range(p, 0.8, 0.9));
+  scene.style.opacity = sv * (1 - range(p, 0.86, 0.94));
   globe.draw(gp, sv * (1 - range(p, 0.94, 1)), performance.now() / 1000);
-  scount.textContent = '+R$ ' + Math.round(1e9 * range(gp, 0.04, 0.8)).toLocaleString('pt-BR');
+  scount.textContent = '+R$ ' + Math.round(1e9 * range(gp, 0.02, 0.58)).toLocaleString('pt-BR');
 
   const c = range(p, 0.02, 0.2);
   claim.style.opacity = 1 - c;
