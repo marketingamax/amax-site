@@ -132,6 +132,10 @@
   .tese-text { max-width:52ch; margin:clamp(50px,7vw,120px) auto 0; text-align:center; font-size:clamp(16px,1.35vw,23px); line-height:1.22; }
   .tese-text p + p { margin-top:1em; }
 
+  /* faixa curva de imagens em fluxo (tilted grid) */
+  .tgh { position:relative; height:clamp(420px,48vw,680px); margin:clamp(40px,6vw,100px) calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); overflow:hidden; perspective:1300px; perspective-origin:50% 50%; }
+  .tgh-tile { position:absolute; left:50%; top:50%; border-radius:14px; overflow:hidden; will-change:transform,opacity; backface-visibility:hidden; background:#111; }
+  .tgh-tile img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
   /* rastro de imagens no mouse */
   .trail-area { position:relative; height:clamp(380px,78vh,820px); margin:clamp(40px,6vw,100px) calc(var(--pad) * -1) calc(clamp(90px,13vw,220px) * -1); overflow:hidden; cursor:none; touch-action:pan-y; }
   .trail-pill { position:absolute; left:0; top:0; z-index:500; display:flex; align-items:center; gap:10px; background:#000; color:#fff; border-radius:999px; padding:9px 14px; font-size:12px; letter-spacing:-.01em; white-space:nowrap; pointer-events:none; will-change:transform; }
@@ -433,9 +437,7 @@
       <p class="rv">Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?</p>
     </div>
     <div class="go-row rv"><a class="go d solid" href="#cases">Ver os cases ↓</a><a class="go d" href="https://wa.me/5548988008769?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20AMAX%20e%20gostaria%20de%20saber%20mais.%20Podemos%20conversar%3F" target="_blank" rel="noopener">Falar com a AMAX</a></div>
-    <div class="trail-area" id="trail" data-imgs="img/verso-outdoor.jpg img/arkki-fachada.jpg img/verso-caixa.jpg img/arkki-livro.jpg img/verso-monolito.jpg img/arkki-onibus.jpg img/verso-revista.jpg img/nextto-folder.jpg img/cena-stand.jpg img/arkki-banner.jpg img/verso-render.jpg img/cena-showroom.jpg">
-      <div class="trail-pill" id="trailpill"><b>AMAX</b><span>[ mova o cursor ]</span></div>
-    </div>
+    <div class="tgh" id="tgh" data-imgs="img/v-outdoor.jpg img/c-nextto.jpg img/a-fachada.jpg img/c-verso-emp.jpg img/v-onibus.jpg img/c-arkki.jpg img/cc-showroom.jpg img/c-ybira.jpg img/v-praia.jpg img/c-liebe.jpg img/cc-sala.jpg img/c-casa-ruth.jpg" aria-hidden="true"></div>
   </section>
 
 
@@ -1234,6 +1236,37 @@ document.querySelectorAll('.acc').forEach(acc => {
       R.setRenderTarget(rt); R.render(scene, cam); R.setRenderTarget(null); R.render(postScene, postCam);
     })(performance.now());
   });
+})();
+
+/* ---------- faixa curva de imagens em fluxo (tilted grid) ---------- */
+(function(){
+  const host = document.getElementById('tgh'); if (!host) return;
+  const tiles = host.dataset.imgs.split(' ').map(src => { const d = document.createElement('div'); d.className = 'tgh-tile'; const im = new Image(); im.src = src; im.alt = ''; im.draggable = false; d.appendChild(im); host.appendChild(d); return d; });
+  let W = 1, H = 1, tw = 100, th = 80, step = 120, L = 600, off = 0, visible = false, slow = 1, slowT = 1, last = performance.now();
+  const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  function layout(){
+    const r = host.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height);
+    th = H * .46; tw = th * 1.3; step = tw + Math.max(14, W * .012); L = tiles.length * step;
+    tiles.forEach(d => { d.style.width = tw + 'px'; d.style.height = th + 'px'; d.style.marginLeft = (-tw / 2) + 'px'; d.style.marginTop = (-th / 2) + 'px'; });
+  }
+  new ResizeObserver(layout).observe(host); layout();
+  host.addEventListener('pointerenter', () => { slowT = .3; }); host.addEventListener('pointerleave', () => { slowT = 1; });
+  new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; last = performance.now(); }, { rootMargin: '120px' }).observe(host);
+  (function loop(now){
+    requestAnimationFrame(loop);
+    if (!visible) return;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    slow += (slowT - slow) * .08; off += 52 * slow * dt;
+    const Rc = W * .75;
+    tiles.forEach((d, i) => {
+      const sx = (((i * step + off + L / 2) % L) + L) % L - L / 2, u = sx / (W / 2);
+      if (Math.abs(u) > 1.5) { d.style.visibility = 'hidden'; return; }
+      d.style.visibility = 'visible';
+      const phi = Math.max(-1.25, Math.min(1.25, u)) * .95;
+      d.style.transform = 'translate3d(' + sx + 'px,0,' + (Rc * (1 - Math.cos(phi))) + 'px) rotateY(' + (-phi * 57.2958) + 'deg)';
+      d.style.opacity = u > 0 ? 1 - sm(.5, 1.1, u) : 1 - sm(1.05, 1.3, -u);
+    });
+  })(performance.now());
 })();
 </script>
 </body>
