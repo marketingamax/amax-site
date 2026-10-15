@@ -19,14 +19,14 @@ Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, p
 Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?
 
 ## 4. Case principal: Verso
-**VERSO. Um conceito que não existia na ilha.**
-Atuamos como extensão do time da incorporadora. Analisamos a tabela comercial, as plantas e os renders e, em conjunto, decidimos reformular todo o conceito e o branding para algo que ainda não existia na ilha: **[ideia do conceito em uma frase]**.
+**De Semaco a Verso.**
+Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.
 
-- **Antes:** [como o empreendimento era posicionado]
-- **O que fizemos:** diagnóstico da tabela e das plantas · novo conceito · naming (Semaco → Verso) · identidade · brandbook · campanha
-- **Depois:** **[resultado em número: valor por m², tabela, VSO ou velocidade de vendas]**
+- **Antes:** Semaco
+- **Depois:** Verso Empreendimentos
+- **O que fizemos:** naming · identidade visual · brandbook · campanha de lançamento · materiais e aplicações
 
-**Em breve:** mais 2 empreendimentos com a AMAX à frente de tudo, da estratégia à venda. **[nomes ou "2027", se autorizado]**
+**Tag:** Em breve: um novo conceito único, nunca visto em Floripa. (o conceito não é divulgado)
 
 [Imagens: antes/depois da marca, outdoor, revista, caixa, guindaste]
 
