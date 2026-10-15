@@ -149,6 +149,12 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   /* tese */
   .tese .stmt { text-indent:0; text-align:center; max-width:17em; margin:0 auto; }
   .tese .cols { display:grid; grid-template-columns:1fr 1fr; gap:clamp(24px,5vw,90px); max-width:980px; margin:clamp(60px,9vw,150px) auto 0; text-align:center; }
+  .pillars { display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(16px,1.6vw,30px); max-width:1280px; margin:clamp(50px,6vw,100px) auto; }
+  .pillars > div { border-top:1px solid rgba(255,255,255,.22); padding-top:18px; text-align:left; }
+  .pillars h4 { font-weight:600; font-size:clamp(20px,2vw,34px); line-height:1.08; letter-spacing:-.035em; }
+  .pillars p { margin-top:12px; color:rgba(255,255,255,.55); font-size:clamp(13px,1vw,16px); letter-spacing:-.01em; }
+  .pillars > div:nth-child(2) { transition-delay:.12s; } .pillars > div:nth-child(3) { transition-delay:.24s; }
+  @media (max-width:820px){ .pillars { grid-template-columns:1fr; } }
   .tese-text { max-width:52ch; margin:clamp(50px,7vw,120px) auto 0; text-align:center; font-size:clamp(16px,1.35vw,23px); line-height:1.22; }
   .tese-text p + p { margin-top:1em; }
 
@@ -451,6 +457,13 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
     <h2 class="big stmt rv">Extensão estratégica da incorporadora. Com um objetivo: <em class="serif">VGV.</em></h2>
     <div class="tese-text">
       <p class="rv">Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, plantas, renders, terreno e concorrência, e decidimos junto com você. A marca vem depois, como consequência da estratégia.</p>
+    </div>
+    <div class="pillars">
+      <div class="rv"><h4>Branding, posicionamento e estratégia</h4><p>Do posicionamento ao lançamento imobiliário.</p></div>
+      <div class="rv"><h4>Estratégia de lançamento e comercialização</h4><p>Da concepção do produto à venda.</p></div>
+      <div class="rv"><h4>Planejamento estratégico de marketing e vendas</h4><p>Execução com visão de incorporadora.</p></div>
+    </div>
+    <div class="tese-text" style="margin-top:0">
       <p class="rv">Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?</p>
     </div>
     <div class="go-row rv"><a class="go d solid" href="#cases">Ver os cases ↓</a><a class="go d" href="https://wa.me/5548988008769?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20AMAX%20e%20gostaria%20de%20saber%20mais.%20Podemos%20conversar%3F" target="_blank" rel="noopener">Falar com a AMAX</a></div>
@@ -1268,13 +1281,13 @@ document.querySelectorAll('.acc').forEach(acc => {
     tiles.forEach(d => { d.style.width = tw + 'px'; d.style.height = th + 'px'; d.style.marginLeft = (-tw / 2) + 'px'; d.style.marginTop = (-th / 2) + 'px'; });
   }
   new ResizeObserver(layout).observe(host); layout();
-  host.addEventListener('pointerenter', () => { slowT = .3; }); host.addEventListener('pointerleave', () => { slowT = 1; });
+  host.addEventListener('pointerenter', () => { slowT = .45; }); host.addEventListener('pointerleave', () => { slowT = 1; });
   new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; last = performance.now(); }, { rootMargin: '120px' }).observe(host);
   (function loop(now){
     requestAnimationFrame(loop);
     if (!visible) return;
     const dt = Math.min(.05, (now - last) / 1000); last = now;
-    slow += (slowT - slow) * .08; off += 52 * slow * dt;
+    slow += (slowT - slow) * .08; off += 210 * slow * dt;
     const Rc = W * .75;
     tiles.forEach((d, i) => {
       const sx = (((i * step + off + L / 2) % L) + L) % L - L / 2, u = sx / (W / 2);
