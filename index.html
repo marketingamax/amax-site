@@ -218,6 +218,8 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
   .feature.fullw { grid-template-columns:1fr; gap:clamp(18px,2vw,30px); }
   .feature.fullw .txt { position:static; }
   .feature.fullw .txt dl { max-width:420px; }
+  .cena-logos { display:flex; align-items:center; justify-content:center; gap:clamp(28px,6vw,110px); flex-wrap:wrap; background:#000; border-radius:8px; padding:clamp(34px,5vw,80px) clamp(20px,4vw,70px); }
+  .cena-logos img { height:clamp(42px,5.2vw,86px); width:auto; }
   /* antes e depois da marca (versão compacta) */
   .ba { display:flex; align-items:center; justify-content:space-between; gap:clamp(16px,3vw,48px); flex-wrap:wrap; background:#000; color:#fff; border-radius:8px; padding:clamp(16px,1.8vw,26px) clamp(20px,3vw,44px); }
   .ba-t { font-size:clamp(17px,1.7vw,27px); letter-spacing:-.04em; }
@@ -476,7 +478,44 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 
     <article class="feature fullw">
       <div class="txt rv">
-        <div class="lbl">Case 01 · Verso</div>
+        <div class="lbl">Case 01 · Cena</div>
+        <h3>Um cliente. Três marcas. Ecossistema completo.</h3>
+        <p class="small" style="max-width:62ch">Muitas agências atendem dezenas de clientes superficialmente. Nossa fundadora dedicou 8 anos construindo um ecossistema imobiliário completo — da incorporadora ao produto, do posicionamento à conversão.</p>
+      </div>
+      <div class="cena-logos rv">
+        <img src="img/cena-locacoes.png" alt="Cena Locações">
+        <img src="img/cena-empreendimentos.png" alt="Cena Empreendimentos">
+        <img src="img/cena-urbanismo.png" alt="Cena Urbanismo">
+      </div>
+    </article>
+
+    <article class="feature fullw">
+      <div class="txt rv">
+        <div class="lbl">Case 02 · ARKKI</div>
+        <h3><em class="serif">70%</em> das unidades vendidas em 6 meses.</h3>
+        <p class="small" style="max-width:44ch">Conduzimos o lançamento desde a concepção: diagnóstico estratégico, posicionamento do empreendimento, estratégia comercial e execução de cada etapa.</p>
+        <dl class="small">
+          <dt>VGV</dt><dd><span class="ph">[valor]</span></dd>
+          <dt>Unidades</dt><dd><span class="ph">[número]</span></dd>
+          <dt>Leads</dt><dd><span class="ph">[número]</span></dd>
+        </dl>
+      </div>
+      <div class="acc many rv">
+        <figure class=""><img src="img/a-fachada.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do ARKKI.</span></figcaption></figure>
+        <figure class=""><img src="img/a-banner.jpg" alt="Banner em shopping" loading="lazy"><span class="lab">Shopping</span><figcaption><b>Banner em shopping</b><span>Mais tempo juntos, mais vida no seu dia.</span></figcaption></figure>
+        <figure class=""><img src="img/a-livro.jpg" alt="Livro do empreendimento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro do empreendimento</b><span>Material de apresentação comercial.</span></figcaption></figure>
+        <figure class=""><img src="img/a-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O centro mudou.</span></figcaption></figure>
+        <figure class=""><img src="img/a-onibus.jpg" alt="Mídia em ônibus" loading="lazy"><span class="lab">Ônibus</span><figcaption><b>Mídia em ônibus</b><span>Campanha de lançamento nas ruas.</span></figcaption></figure>
+        <figure class=""><img src="img/a-carrinho.jpg" alt="Ação de rua" loading="lazy"><span class="lab">Ação de rua</span><figcaption><b>Ação de rua</b><span>Carrinho de divulgação do lançamento.</span></figcaption></figure>
+        <figure class=""><img src="img/cc-showroom.jpg" alt="Casa Cena · showroom" loading="lazy"><span class="lab">Showroom</span><figcaption><b>Casa Cena · showroom</b><span>O showroom da Cena.</span></figcaption></figure>
+        <figure class=""><img src="img/cc-evento.jpg" alt="Evento de lançamento" loading="lazy"><span class="lab">Evento</span><figcaption><b>Evento de lançamento</b><span>Noite de apresentação na Casa Cena.</span></figcaption></figure>
+        <figure class=""><img src="img/cc-gravacao.jpg" alt="Gravação de conteúdo" loading="lazy"><span class="lab">Gravação</span><figcaption><b>Gravação de conteúdo</b><span>Estúdio montado dentro da casa.</span></figcaption></figure>
+        <figure class=""><img src="img/cc-sala.jpg" alt="Sala imersiva" loading="lazy"><span class="lab">Sala imersiva</span><figcaption><b>Sala imersiva</b><span>Projeção em tela envolvente.</span></figcaption></figure>
+      </div>
+    </article>
+    <article class="feature fullw">
+      <div class="txt rv">
+        <div class="lbl">Case 03 · Verso</div>
         <h3>De Semaco a Verso.</h3>
         <p class="small" style="max-width:62ch">Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.</p>
       </div>
@@ -507,30 +546,6 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
       </div>
     </article>
 
-    <article class="feature fullw">
-      <div class="txt rv">
-        <div class="lbl">Case 02 · ARKKI</div>
-        <h3><em class="serif">70%</em> das unidades vendidas em 6 meses.</h3>
-        <p class="small" style="max-width:44ch">Conduzimos o lançamento desde a concepção: diagnóstico estratégico, posicionamento do empreendimento, estratégia comercial e execução de cada etapa.</p>
-        <dl class="small">
-          <dt>VGV</dt><dd><span class="ph">[valor]</span></dd>
-          <dt>Unidades</dt><dd><span class="ph">[número]</span></dd>
-          <dt>Leads</dt><dd><span class="ph">[número]</span></dd>
-        </dl>
-      </div>
-      <div class="acc many rv">
-        <figure class=""><img src="img/a-fachada.jpg" alt="Fachada" loading="lazy"><span class="lab">Fachada</span><figcaption><b>Fachada</b><span>Render do ARKKI.</span></figcaption></figure>
-        <figure class=""><img src="img/a-banner.jpg" alt="Banner em shopping" loading="lazy"><span class="lab">Shopping</span><figcaption><b>Banner em shopping</b><span>Mais tempo juntos, mais vida no seu dia.</span></figcaption></figure>
-        <figure class=""><img src="img/a-livro.jpg" alt="Livro do empreendimento" loading="lazy"><span class="lab">Livro</span><figcaption><b>Livro do empreendimento</b><span>Material de apresentação comercial.</span></figcaption></figure>
-        <figure class=""><img src="img/a-outdoor.jpg" alt="Outdoor" loading="lazy"><span class="lab">Outdoor</span><figcaption><b>Outdoor</b><span>O centro mudou.</span></figcaption></figure>
-        <figure class=""><img src="img/a-onibus.jpg" alt="Mídia em ônibus" loading="lazy"><span class="lab">Ônibus</span><figcaption><b>Mídia em ônibus</b><span>Campanha de lançamento nas ruas.</span></figcaption></figure>
-        <figure class=""><img src="img/a-carrinho.jpg" alt="Ação de rua" loading="lazy"><span class="lab">Ação de rua</span><figcaption><b>Ação de rua</b><span>Carrinho de divulgação do lançamento.</span></figcaption></figure>
-        <figure class=""><img src="img/cc-showroom.jpg" alt="Casa Cena · showroom" loading="lazy"><span class="lab">Showroom</span><figcaption><b>Casa Cena · showroom</b><span>O showroom da Cena.</span></figcaption></figure>
-        <figure class=""><img src="img/cc-evento.jpg" alt="Evento de lançamento" loading="lazy"><span class="lab">Evento</span><figcaption><b>Evento de lançamento</b><span>Noite de apresentação na Casa Cena.</span></figcaption></figure>
-        <figure class=""><img src="img/cc-gravacao.jpg" alt="Gravação de conteúdo" loading="lazy"><span class="lab">Gravação</span><figcaption><b>Gravação de conteúdo</b><span>Estúdio montado dentro da casa.</span></figcaption></figure>
-        <figure class=""><img src="img/cc-sala.jpg" alt="Sala imersiva" loading="lazy"><span class="lab">Sala imersiva</span><figcaption><b>Sala imersiva</b><span>Projeção em tela envolvente.</span></figcaption></figure>
-      </div>
-    </article>
 
     <div class="cf-wrap">
       <h2 class="cf-title">Mais cases</h2>

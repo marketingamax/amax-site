@@ -18,7 +18,7 @@ Antes de falar com o corretor, o comprador já decidiu se o seu preço faz senti
 Entramos no seu time antes de qualquer criação. Analisamos tabela comercial, plantas, renders, terreno e concorrência, e decidimos junto com você. A marca vem depois, como consequência da estratégia.
 Cada decisão passa por uma pergunta: isso ajuda a vender mais, e a vender por mais?
 
-## 4. Case principal: Verso
+## 4. Case 03: Verso (ordem dos cases: 01 Cena, 02 ARKKI, 03 Verso)
 **De Semaco a Verso.**
 Atuamos como extensão do time da incorporadora. Juntos, decidimos reposicionar a empresa por inteiro: um novo nome, uma nova identidade e toda a comunicação que sustenta o lançamento.
 
