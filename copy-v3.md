@@ -82,7 +82,6 @@ Na Cena, construímos a comunicação de três marcas: locações, empreendiment
 
 ## 12. Chamada final
 **Vamos construir o próximo capítulo da sua incorporadora?**
-Em 30 minutos mostramos como seríamos a extensão do seu time nesse lançamento.
 [Falar no WhatsApp] · comercial@amax-lancamentos.com · +55 (48) 98800-8769
 
 **AMAX** (logo gigante)
